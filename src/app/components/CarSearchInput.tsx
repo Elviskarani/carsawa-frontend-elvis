@@ -39,7 +39,7 @@ const CarSearchInput: React.FC<CarSearchInputProps> = ({
         />
         <button
           onClick={handleSearch}
-          className="bg-[#272D3C] hover:bg-blue-700 active:bg-blue-800 text-white px-3 sm:px-8 py-3 sm:py-4 font-semibold text-xs sm:text-sm tracking-wide transition-all duration-200 active:translate-y-px min-h-[44px] touch-manipulation whitespace-nowrap"
+          className="bg-[#000000] hover:bg-[#a2d462] active:bg-[#a2d462] text-white px-3 sm:px-8 py-3 sm:py-4 font-semibold text-xs sm:text-sm tracking-wide transition-all duration-200 active:translate-y-px min-h-[44px] touch-manipulation whitespace-nowrap"
         >
           SEARCH
         </button>

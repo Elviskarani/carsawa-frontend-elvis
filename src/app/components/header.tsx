@@ -1,13 +1,46 @@
-// components/Header.js
 "use client";
 
 import Link from 'next/link'
 import Image from 'next/image'
 import { useState, useEffect } from 'react'
 import { usePathname } from 'next/navigation'
-import { PhoneCall } from "lucide-react"
-import { User } from "lucide-react"
-import AuthModal from './Authmodal';
+import { PhoneCall, User } from "lucide-react"
+import AuthModal from './Authmodal'
+
+interface NavLinkProps {
+  href: string
+  children: React.ReactNode
+  pathname: string
+  textColor: string
+  onClick?: () => void
+}
+
+const NavLink = ({
+  href,
+  children,
+  pathname,
+  textColor,
+  onClick
+}: NavLinkProps) => {
+  const isActive = pathname === href
+
+  return (
+    <Link
+      href={href}
+      className={`
+        relative text-sm font-medium leading-normal
+        after:content-[''] after:absolute after:left-0 after:bottom-0
+        after:h-[2px] ${isActive ? 'after:w-full' : 'after:w-0'}
+        after:bg-current hover:after:w-full
+        after:transition-all after:duration-300
+        ${textColor}
+      `}
+      onClick={onClick}
+    >
+      {children}
+    </Link>
+  )
+}
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -16,7 +49,6 @@ const Header = () => {
   const pathname = usePathname()
   const isHomePage = pathname === '/'
 
-  // Handle scroll events
   useEffect(() => {
     const handleScroll = () => {
       const scrollTop = window.scrollY
@@ -24,8 +56,7 @@ const Header = () => {
     }
 
     window.addEventListener('scroll', handleScroll)
-    
-    // Cleanup event listener on component unmount
+
     return () => {
       window.removeEventListener('scroll', handleScroll)
     }
@@ -33,14 +64,6 @@ const Header = () => {
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen)
-  }
-
-  const openAuthModal = () => {
-    setIsAuthModalOpen(true)
-  }
-
-  const closeAuthModal = () => {
-    setIsAuthModalOpen(false)
   }
 
   const handleSignInClick = () => {
@@ -51,17 +74,15 @@ const Header = () => {
     setIsAuthModalOpen(false)
   }
 
-  // Determine header background based on scroll state and page
   const getHeaderBackground = () => {
     if (isHomePage) {
-      return isScrolled 
-        ? 'bg-white border-b border-solid border-b-[#293038]' 
+      return isScrolled
+        ? 'bg-white border-b border-solid border-b-[#293038]'
         : 'bg-transparent border-b-transparent'
     }
     return 'bg-white border-b border-solid border-b-[#293038]'
   }
 
-  // Determine text color based on scroll state and page
   const getTextColor = () => {
     if (isHomePage) {
       return isScrolled ? 'text-black' : 'text-white'
@@ -69,7 +90,6 @@ const Header = () => {
     return 'text-black'
   }
 
-  // Determine icon color based on scroll state and page
   const getIconColor = () => {
     if (isHomePage) {
       return isScrolled ? 'text-black' : 'text-white'
@@ -77,30 +97,27 @@ const Header = () => {
     return 'text-black'
   }
 
-  // Determine border color for sign-in button
   const getSignInBorder = () => {
     if (isHomePage) {
-      return isScrolled 
-        ? 'border-gray-700 hover:bg-gray-50' 
+      return isScrolled
+        ? 'border-gray-700 hover:bg-gray-50'
         : 'border-white'
     }
     return 'border-gray-700 hover:bg-gray-50'
   }
 
-  // Determine mobile menu background
   const getMobileMenuBackground = () => {
     if (isHomePage) {
-      return isScrolled 
+      return isScrolled
         ? 'bg-white border-t border-[#293038]'
         : 'bg-black bg-opacity-90 border-t border-white border-opacity-20'
     }
     return 'bg-white border-t border-[#293038]'
   }
 
-  // Determine mobile menu border color
   const getMobileBorderColor = () => {
     if (isHomePage) {
-      return isScrolled 
+      return isScrolled
         ? 'border-gray-200'
         : 'border-white border-opacity-20'
     }
@@ -110,66 +127,71 @@ const Header = () => {
   return (
     <>
       <header className={`sticky top-0 z-50 transition-all duration-300 ${getHeaderBackground()}`}>
-        <div className="flex items-center justify-between px-4 sm:px-6 md:px-12 py-3">
-          {/* Logo Section */}
-          <Link href="/" className="flex items-center gap-3 text-white hover:opacity-80 transition-opacity">
-            <div className="relative w-10 h-10 sm:w-12 sm:h-12">
-              <Image
-                src="/carsawa.png"
-                alt="Desty Events Logo"
-                fill
-                className="object-contain rounded-md"
-                sizes="(max-width: 640px) 40px, 48px"
-                priority
-              />
-            </div>
-            <h2 className={`text-base sm:text-lg font-bold leading-tight tracking-[-0.015em] ${getTextColor()}`}>
-              Carsawa
-            </h2>
-          </Link>
+        <div className="
+          grid grid-cols-3
+          items-center
+          px-4 sm:px-6 md:px-12 py-3
+        ">
+          {/* Left: Logo */}
+          <div className="flex justify-start">
+            <Link href="/" className="flex items-center gap-3 text-white hover:opacity-80 transition-opacity">
+              <div className="relative w-10 h-10 sm:w-12 sm:h-12">
+                <Image
+                  src="/carsawa.png"
+                  alt="Carsawa Logo"
+                  fill
+                  className="object-contain rounded-md"
+                  sizes="(max-width: 640px) 40px, 48px"
+                  priority
+                />
+              </div>
+              <h2 className={`text-base sm:text-lg font-bold leading-tight tracking-[-0.015em] ${getTextColor()}`}>
+                Carsawa
+              </h2>
+            </Link>
+          </div>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden lg:flex items-center gap-5">
-            <Link href="/cars" className={`text-sm font-medium leading-normal hover:underline hover:font-bold transition-opacity ${getTextColor()}`}>
+          {/* Center: Nav */}
+          <div className="hidden lg:flex justify-center gap-5">
+            <NavLink href="/cars" pathname={pathname} textColor={getTextColor()}>
               Buy
-            </Link>
-            <Link href="/dealers" className={`text-sm font-medium leading-normal hover:underline hover:font-bold transition-opacity ${getTextColor()}`}>
+            </NavLink>
+            <NavLink href="/dealers" pathname={pathname} textColor={getTextColor()}>
               View Dealerships
-            </Link>
-            <Link href="/sell-a-car" className={`text-sm font-medium leading-normal hover:underline hover:font-bold transition-opacity ${getTextColor()}`}>
+            </NavLink>
+            <NavLink href="/sell-a-car" pathname={pathname} textColor={getTextColor()}>
               Sell
-            </Link>
-           
-            <Link href="/account" className={`text-sm font-medium leading-normal hover:underline hover:font-bold transition-opacity ${getTextColor()}`}>
+            </NavLink>
+            <NavLink href="/account" pathname={pathname} textColor={getTextColor()}>
               Account
-            </Link>
-           
-          </nav>
-
-          {/* Contact section - Hidden on mobile, visible on tablet and up */}
-          <div className="hidden md:flex gap-2 items-center">
-            <PhoneCall size={18} className={getIconColor()}/>
-            <h2 className={`text-sm ${getTextColor()}`}>
-              Call us at +254791001601
-            </h2>
+            </NavLink>
           </div>
 
-          {/* Sign in button - Always visible, responsive design */}
-          <div 
-            className={`flex border rounded p-2 gap-2 items-center hover:bg-opacity-10 hover:bg-gray-500 transition-colors cursor-pointer ${getSignInBorder()}`}
-            onClick={handleSignInClick}
-          >
-            <User size={18} className={getIconColor()}/>
-            <h2 className={`text-sm sm:block ${getTextColor()}`}>
-              Sign In
-            </h2>
+          {/* Right: Sign In + Phone */}
+          <div className="hidden lg:flex justify-end items-center gap-5">
+            <div
+              className={`flex border rounded p-2 gap-2 items-center hover:bg-opacity-5 hover:bg-[#a2d462] transition-colors cursor-pointer ${getSignInBorder()}`}
+              onClick={handleSignInClick}
+            >
+              <User size={18} className={getIconColor()} />
+              <h2 className={`text-sm sm:block ${getTextColor()}`}>
+                Sign In
+              </h2>
+            </div>
+
+            <div className="hidden md:flex gap-2 items-center">
+              <PhoneCall size={18} className={getIconColor()} />
+              <h2 className={`text-sm ${getTextColor()}`}>
+                +254791001601
+              </h2>
+            </div>
           </div>
 
-          {/* Mobile Menu Button - Only visible on mobile */}
+          {/* Mobile Menu Button */}
           <button
             onClick={toggleMenu}
             className={`lg:hidden p-2 rounded-md transition-colors ${
-              isHomePage 
+              isHomePage
                 ? (isScrolled ? 'text-black hover:bg-gray-100' : 'text-white hover:bg-white hover:bg-opacity-10')
                 : 'text-black hover:bg-gray-100'
             }`}
@@ -205,33 +227,34 @@ const Header = () => {
         {isMenuOpen && (
           <nav className={`lg:hidden px-4 py-4 ${getMobileMenuBackground()}`}>
             <div className="flex flex-col space-y-4">
-              <Link 
-                href="/cars" 
-                className={`text-sm font-medium leading-normal hover:opacity-80 transition-opacity py-2 ${getTextColor()}`}
+              <NavLink
+                href="/cars"
+                pathname={pathname}
+                textColor={getTextColor()}
                 onClick={() => setIsMenuOpen(false)}
               >
                 Buy
-              </Link>
-              <Link 
-                href="/sell-a-car" 
-                className={`text-sm font-medium leading-normal hover:opacity-80 transition-opacity py-2 ${getTextColor()}`}
+              </NavLink>
+              <NavLink
+                href="/sell-a-car"
+                pathname={pathname}
+                textColor={getTextColor()}
                 onClick={() => setIsMenuOpen(false)}
               >
                 Sell
-              </Link>
-             
-              <Link 
-                href="/account" 
-                className={`text-sm font-medium leading-normal hover:opacity-80 transition-opacity py-2 ${getTextColor()}`}
+              </NavLink>
+              <NavLink
+                href="/account"
+                pathname={pathname}
+                textColor={getTextColor()}
                 onClick={() => setIsMenuOpen(false)}
               >
                 Account
-              </Link>
-            
-              {/* Mobile-only contact info */}
+              </NavLink>
+
               <div className={`border-t pt-4 mt-4 sm:hidden ${getMobileBorderColor()}`}>
                 <div className="flex items-center gap-2 py-2">
-                  <PhoneCall size={18} className={getIconColor()}/>
+                  <PhoneCall size={18} className={getIconColor()} />
                   <span className={`text-sm ${getTextColor()}`}>
                     +254791001601
                   </span>
@@ -242,10 +265,9 @@ const Header = () => {
         )}
       </header>
 
-      {/* Auth Modal */}
-      <AuthModal 
-        isOpen={isAuthModalOpen} 
-        onClose={handleCloseModal} 
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={handleCloseModal}
       />
     </>
   )
