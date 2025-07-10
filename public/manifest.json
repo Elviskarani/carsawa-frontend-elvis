@@ -1,0 +1,21 @@
+{
+  "name": "Carsawa Prime",
+  "short_name": "Carsawa",
+  "description": "The best place to find your next car.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
+  "icons": [
+    {
+      "src": "/carsawa.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/carsawa.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

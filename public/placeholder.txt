@@ -1,0 +1,11 @@
+Please add the following car images here:
+
+1. landcruiser.jpg - Toyota Land Cruiser image
+2. mercedes.jpg - Mercedes Benz model image  
+3. bmw.jpg - BMW model image
+
+Images should be:
+- High quality professional photos
+- Optimized for web (recommended size: 800x600px)
+- Representative of the Kenyan market
+- Properly licensed
