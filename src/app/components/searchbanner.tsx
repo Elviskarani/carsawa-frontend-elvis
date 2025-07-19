@@ -62,7 +62,7 @@ const HeroSection = () => {
                                 onClick={() => {
                                     // Handle sell car action
                                     // e.g., navigate to sell car page
-                                    router.push('/sell-car');
+                                    router.push('/sell-a-car');
                                 }}
                             />
                         </div>

@@ -134,7 +134,7 @@ export interface UserFavoritesResponse {
 }
 
 // API base URL - replace with your actual API URL
-const API_BASE_URL = 'http://localhost:5000';
+const API_BASE_URL = 'http://68.183.72.73:5000';
 
 // Token management
 export const TokenManager = {

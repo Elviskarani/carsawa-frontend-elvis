@@ -321,10 +321,7 @@ const EditProfilePage = () => {
         
         <h2 className="text-lg font-semibold text-gray-900 mb-4">Favourites</h2>
         <FavoritesGrid />
-        <div className="bg-gray-50 rounded-lg p-8 text-center text-gray-500 mb-8">
-          <p>No favourite cars yet</p>
-        </div>
-
+        
         {/* Logout Button */}
         <div className="border-t border-gray-200 pt-6">
           <button

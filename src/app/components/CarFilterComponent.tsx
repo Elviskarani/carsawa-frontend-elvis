@@ -114,7 +114,8 @@ export default function CarFilterComponent({ onFiltersChange, initialFilters = {
     { value: 'Suzuki', label: 'Suzuki' },
     { value: 'Porsche', label: 'Porsche' },
     { value: 'Rolls Royce', label: 'Rolls Royce' },
-    { value: 'Jaguar', label: 'Jaguar' }
+    { value: 'Jaguar', label: 'Jaguar' },
+     {value: 'Mclaren', label: 'Mclaren'}
   ];
 
   const bodyTypeOptions: FilterOption[] = [
