@@ -176,6 +176,7 @@ export const TokenManager = {
 };
 
 // Helper function for API requests
+// Helper function for API requests
 async function fetchApi<T>(endpoint: string, options?: RequestInit): Promise<T> {
   const url = `${API_BASE_URL}/api${endpoint}`;
   
@@ -187,7 +188,7 @@ async function fetchApi<T>(endpoint: string, options?: RequestInit): Promise<T> 
       ...(token && { 'Authorization': `Bearer ${token}` }),
     },
     credentials: 'include',
-    mode: 'cors'
+    // Remove mode: 'cors' - it's not needed and can cause issues
   };
   
   try {
@@ -213,7 +214,6 @@ async function fetchApi<T>(endpoint: string, options?: RequestInit): Promise<T> 
     return Promise.reject(error);
   }
 }
-
 // Authentication API functions
 export async function registerUser(userData: RegisterData): Promise<AuthResponse> {
   return fetchApi<AuthResponse>('/users/register', {
