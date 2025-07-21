@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Header from "./components/header";
 import Footer from "./components/footer";
+import { Analytics } from "@vercel/analytics/next"
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -17,7 +18,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Carsawa",
   description: "Largest car marketplace in kenya",
-  icons: '/carsawa.png',
+  icons: {
+    icon: "/carsawa.png",
+  },
   manifest: '/manifest.json'
 };
 
@@ -33,6 +36,7 @@ export default function RootLayout({
       >
         <Header/>
         {children}
+        <Analytics />
         <Footer/>
       </body>
     </html>
