@@ -18,9 +18,11 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Carsawa",
   description: "Largest car marketplace in kenya",
-  icons: {
-    icon: "/carsawa.png",
-  },
+  icons: [
+    { rel: 'icon', url: '/favicon.ico' },
+    { rel: 'icon', url: '/carsawa.png', type: 'image/png' },
+    { rel: 'apple-touch-icon', url: '/carsawa.png' },
+  ],
   manifest: '/manifest.json'
 };
 

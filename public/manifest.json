@@ -1,7 +1,7 @@
 {
-  "name": "Carsawa Prime",
+  "name": "Carsawa",
   "short_name": "Carsawa",
-  "description": "The best place to find your next car.",
+  "description": "Carsawa is the largest marketplace to get used and new cars.Chat with dealers all across the country to get the best deal.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
