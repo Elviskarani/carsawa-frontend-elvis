@@ -1,4 +1,3 @@
-// components/HeroSection.tsx
 "use client";
 
 import Image from 'next/image';
@@ -49,22 +48,36 @@ const HeroSection = () => {
                         to buy or sell cars  🇰🇪
                     </h1>
 
-                    {/* Search Input */}
-                    <div className="mt-6 sm:mt-8 flex flex-col gap-4 sm:gap-6">
+                    {/* Actions Container */}
+                    <div className="mt-6 sm:mt-8 flex flex-col gap-4">
+                        {/* Search Input */}
                         <div className="w-full">
                             <CarSearchInput
                                 onSearch={handleSearch}
                                 placeholder="Search your desired car"
                             />
                         </div>
-                        <div className="w-full sm:w-auto">
-                            <SellCarButton
-                                onClick={() => {
-                                    // Handle sell car action
-                                    // e.g., navigate to sell car page
-                                    router.push('/sell-a-car');
-                                }}
-                            />
+                        
+                        {/* Buttons Container */}
+                        <div className="flex flex-col sm:flex-row gap-4 sm:gap-6">
+                            {/* See All Cars Button */}
+                            <button
+                                onClick={() => router.push('/cars')}
+                                className="w-full sm:w-auto px-6 py-3 bg-[#000000] hover:bg-[#a2d462] active:bg-[#a2d462]  text-white font-semibold rounded-lg shadow-md  focus:outline-none focus:ring-2 focus:ring-opacity-75 transition-colors duration-300"
+                            >
+                                See all available cars
+                            </button>
+
+                            {/* Sell Car Button */}
+                            <div className="w-full sm:w-auto">
+                                <SellCarButton
+                                    onClick={() => {
+                                        // Handle sell car action
+                                        // e.g., navigate to sell car page
+                                        router.push('/sell-a-car');
+                                    }}
+                                />
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -73,4 +86,4 @@ const HeroSection = () => {
     )
 }
 
-export default HeroSection
+export default HeroSection;
