@@ -209,10 +209,10 @@ const AuthModal: React.FC<AuthModalProps> = ({
 
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50 p-4 backdrop-blur-sm" style={{backgroundColor: 'rgba(0, 0, 0, 0.70)'}}>
-      <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
-        <div className="flex h-full">
+      <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[95vh] flex flex-col overflow-hidden">
+        <div className="flex flex-1 min-h-0">
           {/* Left side - Features */}
-          <div className="bg-[#272D3C] text-white p-8 w-1/2 hidden md:block">
+          <div className="bg-[#272D3C] text-white p-8 w-1/2 hidden md:flex flex-col justify-center">
             <div className="space-y-8">
               <div className="flex items-start space-x-4">
                 <div>
@@ -238,182 +238,187 @@ const AuthModal: React.FC<AuthModalProps> = ({
           </div>
 
           {/* Right side - Form */}
-          <div className="w-full md:w-1/2 p-8 relative">
+          <div className="w-full md:w-1/2 flex flex-col relative">
             <button
               onClick={handleClose}
-              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
+              className="absolute top-6 right-6 text-gray-400 hover:text-gray-600 z-10"
               disabled={isLoading}
             >
               <X size={24} />
             </button>
 
-            <div className="max-w-md mx-auto">
-              {/* Progress indicator */}
-              <div className="mb-8">
-                <div className="w-16 h-1 bg-[#c1ff72] rounded"></div>
-              </div>
-
-              <h2 className="text-2xl font-bold mb-2 text-gray-900">
-                {isSignUp ? 'Create Account' : 'Welcome Back'}
-              </h2>
-              
-              <p className="text-gray-600 mb-6">
-                {isSignUp 
-                  ? 'Sign up to access your personalized car marketplace experience' 
-                  : 'Sign in to your account to continue'
-                }
-              </p>
-
-              {/* Error Message */}
-              {error && (
-                <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg text-sm">
-                  {error}
+            {/* Scrollable content area */}
+            <div className="flex-1 overflow-y-auto p-8 pt-16">
+              <div className="max-w-md mx-auto">
+                {/* Progress indicator */}
+                <div className="mb-6">
+                  <div className="w-16 h-1 bg-[#c1ff72] rounded"></div>
                 </div>
-              )}
 
-              <form onSubmit={handleSubmit} className="space-y-6">
-                {isSignUp && (
+                <h2 className="text-2xl font-bold mb-2 text-gray-900">
+                  {isSignUp ? 'Create Account' : 'Welcome Back'}
+                </h2>
+                
+                <p className="text-gray-600 mb-6">
+                  {isSignUp 
+                    ? 'Sign up to access your personalized car marketplace experience' 
+                    : 'Sign in to your account to continue'
+                  }
+                </p>
+
+                {/* Error Message */}
+                {error && (
+                  <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg text-sm">
+                    {error}
+                  </div>
+                )}
+
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  {isSignUp && (
+                    <div className="relative">
+                      <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                      <input
+                        type="text"
+                        name="fullName"
+                        placeholder="Enter Full Name"
+                        value={formData.fullName}
+                        onChange={handleInputChange}
+                        className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        disabled={isLoading}
+                        required
+                      />
+                    </div>
+                  )}
+
                   <div className="relative">
-                    <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
                     <input
-                      type="text"
-                      name="fullName"
-                      placeholder="Enter Full Name"
-                      value={formData.fullName}
+                      type="email"
+                      name="email"
+                      placeholder="Enter Email Address"
+                      value={formData.email}
                       onChange={handleInputChange}
                       className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       disabled={isLoading}
                       required
                     />
                   </div>
-                )}
 
-                <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
-                  <input
-                    type="email"
-                    name="email"
-                    placeholder="Enter Email Address"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    disabled={isLoading}
-                    required
-                  />
-                </div>
-
-                {isSignUp && (
-                  <div className="relative">
-                    <div className="flex">
-                      <div className="flex items-center px-3 border border-r-0 border-gray-300 rounded-l-lg bg-gray-50">
-                        <img src="https://flagcdn.com/w20/ke.png" alt="KE" className="w-5 h-3 mr-2" />
-                        <span className="text-sm text-gray-600">+254</span>
+                  {isSignUp && (
+                    <div className="relative">
+                      <div className="flex">
+                        <div className="flex items-center px-4 border border-r-0 border-gray-300 rounded-l-lg bg-gray-50">
+                          <img src="https://flagcdn.com/w20/ke.png" alt="KE" className="w-4 h-3 mr-2" />
+                          <span className="text-sm text-gray-600">+254</span>
+                        </div>
+                        <input
+                          type="tel"
+                          name="phone"
+                          placeholder="Phone Number"
+                          value={formData.phone}
+                          onChange={handleInputChange}
+                          className="w-full px-4 py-3 border border-gray-300 rounded-r-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          disabled={isLoading}
+                          required
+                        />
                       </div>
-                      <input
-                        type="tel"
-                        name="phone"
-                        placeholder="Phone Number"
-                        value={formData.phone}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-r-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        disabled={isLoading}
-                        required
-                      />
                     </div>
-                  </div>
-                )}
-
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    name="password"
-                    placeholder="Enter Password"
-                    value={formData.password}
-                    onChange={handleInputChange}
-                    className="w-full pl-12 pr-12 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    disabled={isLoading}
-                    required
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                    disabled={isLoading}
-                  >
-                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                  </button>
-                </div>
-
-                {!isSignUp && (
-                  <div className="flex items-center justify-between">
-                    <label className="flex items-center">
-                      <input
-                        type="checkbox"
-                        name="rememberMe"
-                        checked={formData.rememberMe}
-                        onChange={handleInputChange}
-                        className="mr-2"
-                        disabled={isLoading}
-                      />
-                      <span className="text-sm text-gray-600">Remember Me</span>
-                    </label>
-                    <a href="#" className="text-sm text-blue-600 hover:underline">
-                      Forgot Password?
-                    </a>
-                  </div>
-                )}
-
-                {isSignUp && (
-                  <>
-                    <label className="flex items-center">
-                      <input
-                        type="checkbox"
-                        name="rememberMe"
-                        checked={formData.rememberMe}
-                        onChange={handleInputChange}
-                        className="mr-2"
-                        disabled={isLoading}
-                      />
-                      <span className="text-sm text-gray-600">Remember Me</span>
-                    </label>
-                    
-                    <p className="text-sm text-gray-600">
-                      By clicking Sign Up Button, you agree to our{' '}
-                      <a href="#" className="text-blue-600 hover:underline">Terms of Use</a>
-                      {' '}and{' '}
-                      <a href="#" className="text-blue-600 hover:underline">Privacy Policy</a>
-                    </p>
-                  </>
-                )}
-
-                <button
-                  type="submit"
-                  disabled={isLoading}
-                  className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
-                >
-                  {isLoading ? (
-                    <>
-                      <Loader2 className="animate-spin mr-2" size={20} />
-                      {isSignUp ? 'Creating Account...' : 'Signing In...'}
-                    </>
-                  ) : (
-                    isSignUp ? 'Create Account' : 'Sign In'
                   )}
-                </button>
 
-                <p className="text-center text-sm text-gray-600">
-                  {isSignUp ? 'Already have an account?' : "Don't have an account?"}{' '}
-                  <button
-                    type="button"
-                    onClick={toggleMode}
-                    className="text-blue-600 hover:underline font-medium"
-                    disabled={isLoading}
-                  >
-                    {isSignUp ? 'Sign In' : 'Sign Up'}
-                  </button>
-                </p>
-              </form>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      name="password"
+                      placeholder="Enter Password"
+                      value={formData.password}
+                      onChange={handleInputChange}
+                      className="w-full pl-12 pr-12 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      disabled={isLoading}
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                      disabled={isLoading}
+                    >
+                      {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                    </button>
+                  </div>
+
+                  {!isSignUp && (
+                    <div className="flex items-center justify-between">
+                      <label className="flex items-center">
+                        <input
+                          type="checkbox"
+                          name="rememberMe"
+                          checked={formData.rememberMe}
+                          onChange={handleInputChange}
+                          className="mr-2"
+                          disabled={isLoading}
+                        />
+                        <span className="text-sm text-gray-600">Remember Me</span>
+                      </label>
+                      <a href="#" className="text-sm text-blue-600 hover:underline">
+                        Forgot Password?
+                      </a>
+                    </div>
+                  )}
+
+                  {isSignUp && (
+                    <div className="space-y-4">
+                      <label className="flex items-center">
+                        <input
+                          type="checkbox"
+                          name="rememberMe"
+                          checked={formData.rememberMe}
+                          onChange={handleInputChange}
+                          className="mr-2"
+                          disabled={isLoading}
+                        />
+                        <span className="text-sm text-gray-600">Remember Me</span>
+                      </label>
+                      
+                      <p className="text-sm text-gray-600">
+                        By clicking Sign Up Button, you agree to our{' '}
+                        <a href="#" className="text-blue-600 hover:underline">Terms of Use</a>
+                        {' '}and{' '}
+                        <a href="#" className="text-blue-600 hover:underline">Privacy Policy</a>
+                      </p>
+                    </div>
+                  )}
+
+                  <div className="pt-4">
+                    <button
+                      type="submit"
+                      disabled={isLoading}
+                      className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                    >
+                      {isLoading ? (
+                        <>
+                          <Loader2 className="animate-spin mr-2" size={20} />
+                          {isSignUp ? 'Creating Account...' : 'Signing In...'}
+                        </>
+                      ) : (
+                        isSignUp ? 'Create Account' : 'Sign In'
+                      )}
+                    </button>
+                    
+                    <p className="text-center text-sm text-gray-600 mt-4">
+                      {isSignUp ? 'Already have an account?' : "Don't have an account?"}{' '}
+                      <button
+                        type="button"
+                        onClick={toggleMode}
+                        className="text-blue-600 hover:underline font-medium"
+                        disabled={isLoading}
+                      >
+                        {isSignUp ? 'Sign In' : 'Sign Up'}
+                      </button>
+                    </p>
+                  </div>
+                </form>
+              </div>
             </div>
           </div>
         </div>
