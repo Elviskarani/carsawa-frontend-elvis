@@ -6,6 +6,7 @@ import { useState, useEffect } from 'react'
 import { usePathname } from 'next/navigation'
 import { PhoneCall, User } from "lucide-react"
 import AuthModal from './Authmodal'
+import { TokenManager } from '../services/api'
 
 interface NavLinkProps {
   href: string
@@ -46,6 +47,7 @@ const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
   const pathname = usePathname()
   const isHomePage = pathname === '/'
 
@@ -55,10 +57,27 @@ const Header = () => {
       setIsScrolled(scrollTop > 0)
     }
 
+    // Check authentication status
+    const checkAuthStatus = () => {
+      setIsAuthenticated(TokenManager.isTokenValid())
+    }
+
+    // Check on mount
+    checkAuthStatus()
+
+    // Listen for storage changes (login/logout from other tabs)
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'token') {
+        checkAuthStatus()
+      }
+    }
+
     window.addEventListener('scroll', handleScroll)
+    window.addEventListener('storage', handleStorageChange)
 
     return () => {
       window.removeEventListener('scroll', handleScroll)
+      window.removeEventListener('storage', handleStorageChange)
     }
   }, [])
 
@@ -67,7 +86,18 @@ const Header = () => {
   }
 
   const handleSignInClick = () => {
-    setIsAuthModalOpen(true)
+    if (isAuthenticated) {
+      // If authenticated, redirect to account page
+      window.location.href = '/account'
+    } else {
+      // If not authenticated, open auth modal
+      setIsAuthModalOpen(true)
+    }
+  }
+
+  const handleAuthSuccess = () => {
+    setIsAuthenticated(true)
+    setIsAuthModalOpen(false)
   }
 
   const handleCloseModal = () => {
@@ -76,6 +106,10 @@ const Header = () => {
 
   const getHeaderBackground = () => {
     if (isHomePage) {
+      // Only force white background when mobile menu is open OR scrolled
+      if (isMenuOpen) {
+        return 'bg-white border-b border-solid border-b-[#293038]'
+      }
       return isScrolled
         ? 'bg-white border-b border-solid border-b-[#293038]'
         : 'bg-transparent border-b-transparent'
@@ -85,6 +119,10 @@ const Header = () => {
 
   const getTextColor = () => {
     if (isHomePage) {
+      // Force black text only when mobile menu is open OR scrolled
+      if (isMenuOpen) {
+        return 'text-black'
+      }
       return isScrolled ? 'text-black' : 'text-white'
     }
     return 'text-black'
@@ -92,6 +130,10 @@ const Header = () => {
 
   const getIconColor = () => {
     if (isHomePage) {
+      // Force black icons only when mobile menu is open OR scrolled
+      if (isMenuOpen) {
+        return 'text-black'
+      }
       return isScrolled ? 'text-black' : 'text-white'
     }
     return 'text-black'
@@ -99,6 +141,9 @@ const Header = () => {
 
   const getSignInBorder = () => {
     if (isHomePage) {
+      if (isMenuOpen) {
+        return 'border-gray-700 hover:bg-gray-50'
+      }
       return isScrolled
         ? 'border-gray-700 hover:bg-gray-50'
         : 'border-white'
@@ -107,33 +152,35 @@ const Header = () => {
   }
 
   const getMobileMenuBackground = () => {
-    if (isHomePage) {
-      return isScrolled
-        ? 'bg-white border-t border-[#293038]'
-        : 'bg-black bg-opacity-90 border-t border-white border-opacity-20'
-    }
+    // Always white background for mobile menu
     return 'bg-white border-t border-[#293038]'
   }
 
   const getMobileBorderColor = () => {
-    if (isHomePage) {
-      return isScrolled
-        ? 'border-gray-200'
-        : 'border-white border-opacity-20'
-    }
+    // Always gray border for mobile menu
     return 'border-gray-200'
+  }
+
+  const getMobileMenuButtonStyle = () => {
+    if (isHomePage) {
+      // When menu is open, always use dark colors regardless of scroll
+      return isMenuOpen
+        ? 'text-black hover:bg-gray-100'
+        : (isScrolled ? 'text-black hover:bg-gray-100' : 'text-white hover:bg-white hover:bg-opacity-10')
+    }
+    return 'text-black hover:bg-gray-100'
   }
 
   return (
     <>
       <header className={`sticky top-0 z-50 transition-all duration-300 ${getHeaderBackground()}`}>
         <div className="
-          grid grid-cols-3
+          flex
           items-center
           px-4 sm:px-6 md:px-12 py-3
         ">
-          {/* Left: Logo */}
-          <div className="flex justify-start">
+          {/* Left: Logo + Mobile Menu Button */}
+          <div className="flex-1 flex justify-start items-center gap-3">
             <Link href="/" className="flex items-center gap-3 text-white hover:opacity-80 transition-opacity">
               <div className="relative w-10 h-10 sm:w-12 sm:h-12">
                 <Image
@@ -149,10 +196,41 @@ const Header = () => {
                 Carsawa
               </h2>
             </Link>
+
+            {/* Mobile Menu Button - positioned next to logo */}
+            <button
+              onClick={toggleMenu}
+              className={`lg:hidden p-2 rounded-md transition-colors ${getMobileMenuButtonStyle()}`}
+              aria-label="Toggle menu"
+            >
+              <svg
+                className="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                {isMenuOpen ? (
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                ) : (
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 6h16M4 12h16M4 18h16"
+                  />
+                )}
+              </svg>
+            </button>
           </div>
 
-          {/* Center: Nav */}
-          <div className="hidden lg:flex justify-center gap-5">
+          {/* Center: Nav - Desktop only */}
+          <div className="hidden lg:flex justify-center gap-5 flex-1">
             <NavLink href="/cars" pathname={pathname} textColor={getTextColor()}>
               Buy
             </NavLink>
@@ -167,18 +245,22 @@ const Header = () => {
             </NavLink>
           </div>
 
-          {/* Right: Sign In + Phone */}
-          <div className="hidden lg:flex justify-end items-center gap-5">
+          {/* Right: Sign In + Phone - Desktop and Mobile */}
+          <div className="flex justify-end items-center gap-5 flex-1">
+            {/* Sign In/User Icon - Both Desktop and Mobile */}
             <div
               className={`flex border rounded p-2 gap-2 items-center hover:bg-opacity-5 hover:bg-[#a2d462] transition-colors cursor-pointer ${getSignInBorder()}`}
               onClick={handleSignInClick}
             >
               <User size={18} className={getIconColor()} />
-              <h2 className={`text-sm sm:block ${getTextColor()}`}>
-                Sign In
-              </h2>
+              {!isAuthenticated && (
+                <h2 className={`text-sm hidden lg:block ${getTextColor()}`}>
+                  Sign In
+                </h2>
+              )}
             </div>
 
+            {/* Phone - Desktop only */}
             <div className="hidden md:flex gap-2 items-center">
               <PhoneCall size={18} className={getIconColor()} />
               <h2 className={`text-sm ${getTextColor()}`}>
@@ -186,41 +268,6 @@ const Header = () => {
               </h2>
             </div>
           </div>
-
-          {/* Mobile Menu Button */}
-          <button
-            onClick={toggleMenu}
-            className={`lg:hidden p-2 rounded-md transition-colors ${
-              isHomePage
-                ? (isScrolled ? 'text-black hover:bg-gray-100' : 'text-white hover:bg-white hover:bg-opacity-10')
-                : 'text-black hover:bg-gray-100'
-            }`}
-            aria-label="Toggle menu"
-          >
-            <svg
-              className="w-6 h-6"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              {isMenuOpen ? (
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              ) : (
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4 6h16M4 12h16M4 18h16"
-                />
-              )}
-            </svg>
-          </button>
         </div>
 
         {/* Mobile Navigation Menu */}
@@ -230,7 +277,7 @@ const Header = () => {
               <NavLink
                 href="/cars"
                 pathname={pathname}
-                textColor={getTextColor()}
+                textColor="text-black"
                 onClick={() => setIsMenuOpen(false)}
               >
                 Buy
@@ -238,7 +285,7 @@ const Header = () => {
               <NavLink
                 href="/sell-a-car"
                 pathname={pathname}
-                textColor={getTextColor()}
+                textColor="text-black"
                 onClick={() => setIsMenuOpen(false)}
               >
                 Sell
@@ -246,16 +293,25 @@ const Header = () => {
               <NavLink
                 href="/account"
                 pathname={pathname}
-                textColor={getTextColor()}
+                textColor="text-black"
                 onClick={() => setIsMenuOpen(false)}
               >
                 Account
               </NavLink>
+              <NavLink
+                href="/dealers"
+                pathname={pathname}
+                textColor="text-black"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                View Dealerships
+              </NavLink>
+              
 
               <div className={`border-t pt-4 mt-4 sm:hidden ${getMobileBorderColor()}`}>
                 <div className="flex items-center gap-2 py-2">
-                  <PhoneCall size={18} className={getIconColor()} />
-                  <span className={`text-sm ${getTextColor()}`}>
+                  <PhoneCall size={18} className="text-black" />
+                  <span className="text-sm text-black">
                     +254791001601
                   </span>
                 </div>
@@ -268,6 +324,7 @@ const Header = () => {
       <AuthModal
         isOpen={isAuthModalOpen}
         onClose={handleCloseModal}
+        onSuccess={handleAuthSuccess}
       />
     </>
   )
