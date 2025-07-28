@@ -15,6 +15,7 @@ const EditProfilePage = () => {
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [activeTab, setActiveTab] = useState<'listings' | 'favorites'>('listings');
 
   const [formData, setFormData] = useState({
     name: '',
@@ -60,7 +61,6 @@ const EditProfilePage = () => {
   }, []);
 
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -184,7 +184,6 @@ const EditProfilePage = () => {
       </>
     );
   }
-
 
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4">
@@ -338,17 +337,47 @@ const EditProfilePage = () => {
           </div>
         )}
 
-        {/* Account Information */}
-        {/* My Listings Section */}
+        {/* Tabs Section */}
         <div className="mb-8">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">My Listings</h2>
-          <UserListingsGrid />
-        </div>
+          {/* Tab Navigation */}
+          <div className="border-b border-gray-200 mb-6">
+            <nav className="-mb-px flex space-x-8">
+              <button
+                onClick={() => setActiveTab('listings')}
+                className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
+                  activeTab === 'listings'
+                    ? 'border-blue-600 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                My Listings
+              </button>
+              <button
+                onClick={() => setActiveTab('favorites')}
+                className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
+                  activeTab === 'favorites'
+                    ? 'border-blue-600 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                Favourites
+              </button>
+            </nav>
+          </div>
 
-        {/* Favourites Section */}
-        <div className="mb-8">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Favourites</h2>
-          <FavoritesGrid />
+          {/* Tab Content */}
+          <div className="min-h-[200px]">
+            {activeTab === 'listings' && (
+              <div>
+                <UserListingsGrid />
+              </div>
+            )}
+            {activeTab === 'favorites' && (
+              <div>
+                <FavoritesGrid />
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Logout Button */}
