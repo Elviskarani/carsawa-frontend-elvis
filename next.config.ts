@@ -11,7 +11,17 @@ const pwaConfig = {
 const nextConfig: NextConfig = {
   /* config options here */
   images: {
-    domains: ['res.cloudinary.com'],
+    // Using remotePatterns is the newer, more secure way to whitelist domains.
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'res.cloudinary.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'carsawa254.s3.*.amazonaws.com',
+      },
+    ],
   },
 };
 
