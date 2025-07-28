@@ -5,6 +5,8 @@ import { User, Mail, Phone, Loader2, AlertCircle } from 'lucide-react';
 import { getUserProfile, updateUserProfile, logoutUser, TokenManager, isAuthenticated } from '../services/api';
 import type { User as UserType, UpdateProfileData } from '../services/api';
 import FavoritesGrid from '@/app/components/FavouritesGrid';
+import AuthModal from '@/app/components/Authmodal';
+import UserListingsGrid from '@/app/components/UserListingGrid';
 
 const EditProfilePage = () => {
   const [user, setUser] = useState<UserType | null>(null);
@@ -13,7 +15,7 @@ const EditProfilePage = () => {
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
-  
+
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
@@ -21,12 +23,12 @@ const EditProfilePage = () => {
     bio: ''
   });
 
-  // Fetch user profile on component mount
+  // Also update the useEffect to handle authentication properly
   useEffect(() => {
     const fetchUserProfile = async () => {
       try {
         if (!isAuthenticated()) {
-          setError('Please log in to view your profile');
+          // Don't set error here, let the component render the auth prompt
           setIsLoading(false);
           return;
         }
@@ -41,7 +43,14 @@ const EditProfilePage = () => {
         });
       } catch (error: any) {
         console.error('Error fetching user profile:', error);
-        setError('Failed to load profile data');
+        // Check if error is due to invalid token
+        if (error.includes('401') || error.includes('unauthorized') || error.includes('token')) {
+          // Token might be expired, clear it and prompt for login
+          TokenManager.removeToken();
+          setUser(null);
+        } else {
+          setError('Failed to load profile data');
+        }
       } finally {
         setIsLoading(false);
       }
@@ -50,13 +59,16 @@ const EditProfilePage = () => {
     fetchUserProfile();
   }, []);
 
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
       [name]: value
     }));
-    
+
     // Clear messages when user starts editing
     if (error) setError(null);
     if (successMessage) setSuccessMessage(null);
@@ -80,12 +92,12 @@ const EditProfilePage = () => {
       setUser(updatedUser);
       setSuccessMessage('Profile updated successfully!');
       setIsEditing(false);
-      
+
       // Clear success message after 3 seconds
       setTimeout(() => {
         setSuccessMessage(null);
       }, 3000);
-      
+
     } catch (error: any) {
       console.error('Error updating profile:', error);
       setError('Failed to update profile. Please try again.');
@@ -146,21 +158,33 @@ const EditProfilePage = () => {
   // Error state - not authenticated
   if (!isAuthenticated() || !user) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center bg-white rounded-lg shadow-sm p-8 max-w-md">
-          <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">Access Denied</h2>
-          <p className="text-gray-600 mb-4">Please log in to view your profile</p>
-          <button
-            onClick={() => window.location.href = '/'}
-            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-          >
-            Go to Home
-          </button>
+      <>
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+          <div className="text-center bg-white rounded-lg shadow-sm p-8 max-w-md">
+            <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
+            <p className="text-gray-600 mb-4">Please log in to view your profile</p>
+            <button
+              onClick={() => setIsAuthModalOpen(true)}
+              className="px-4 py-2 bg-[#272d3c] text-white rounded-md hover:bg-[#1f242f] transition-colors"
+            >
+              Sign In
+            </button>
+          </div>
         </div>
-      </div>
+
+        <AuthModal
+          isOpen={isAuthModalOpen}
+          onClose={() => setIsAuthModalOpen(false)}
+          onSuccess={() => {
+            setIsAuthModalOpen(false);
+            // Refresh the page to fetch user data
+            window.location.reload();
+          }}
+        />
+      </>
     );
   }
+
 
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4">
@@ -201,9 +225,9 @@ const EditProfilePage = () => {
         <div className="flex items-center gap-4 mb-8">
           <div className="w-20 h-20 bg-blue-600 rounded-full flex items-center justify-center">
             {user.profileImage ? (
-              <img 
-                src={user.profileImage} 
-                alt={user.name} 
+              <img
+                src={user.profileImage}
+                alt={user.name}
                 className="w-full h-full rounded-full object-cover"
               />
             ) : (
@@ -235,7 +259,7 @@ const EditProfilePage = () => {
         {/* Personal Details Section */}
         <div className="mb-8">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">Personal Details</h2>
-          
+
           <div className="space-y-4">
             {/* Name Field */}
             <div className="relative">
@@ -246,9 +270,8 @@ const EditProfilePage = () => {
                 value={formData.name}
                 onChange={handleInputChange}
                 disabled={!isEditing}
-                className={`w-full pl-10 pr-4 py-3 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                  isEditing ? 'bg-white' : 'bg-gray-50'
-                }`}
+                className={`w-full pl-10 pr-4 py-3 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${isEditing ? 'bg-white' : 'bg-gray-50'
+                  }`}
                 placeholder="Full Name"
               />
             </div>
@@ -265,9 +288,8 @@ const EditProfilePage = () => {
                 value={formData.phone.replace('+254', '')}
                 onChange={(e) => setFormData(prev => ({ ...prev, phone: '+254' + e.target.value }))}
                 disabled={!isEditing}
-                className={`flex-1 px-4 py-3 border border-gray-200 rounded-r-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                  isEditing ? 'bg-white' : 'bg-gray-50'
-                }`}
+                className={`flex-1 px-4 py-3 border border-gray-200 rounded-r-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${isEditing ? 'bg-white' : 'bg-gray-50'
+                  }`}
                 placeholder="Phone Number"
               />
             </div>
@@ -281,9 +303,8 @@ const EditProfilePage = () => {
                 value={formData.email}
                 onChange={handleInputChange}
                 disabled={!isEditing}
-                className={`w-full pl-10 pr-4 py-3 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                  isEditing ? 'bg-white' : 'bg-gray-50'
-                }`}
+                className={`w-full pl-10 pr-4 py-3 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${isEditing ? 'bg-white' : 'bg-gray-50'
+                  }`}
                 placeholder="Email Address"
               />
             </div>
@@ -318,10 +339,18 @@ const EditProfilePage = () => {
         )}
 
         {/* Account Information */}
-        
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Favourites</h2>
-        <FavoritesGrid />
-        
+        {/* My Listings Section */}
+        <div className="mb-8">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">My Listings</h2>
+          <UserListingsGrid />
+        </div>
+
+        {/* Favourites Section */}
+        <div className="mb-8">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">Favourites</h2>
+          <FavoritesGrid />
+        </div>
+
         {/* Logout Button */}
         <div className="border-t border-gray-200 pt-6">
           <button

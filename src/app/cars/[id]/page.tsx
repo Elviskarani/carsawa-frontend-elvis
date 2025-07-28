@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import ImageCarousel from "@/app/components/imagecarousel";
 import CarDetailsPage from "@/app/components/cardata"; // Your component for car data display
-import { getCarById, type Car, getDealerById, type Dealer } from "@/app/services/api";
+import { getCarById, type Car, getDealerById, type Dealer, getUserById, type User } from "@/app/services/api";
 
 export default function CarDetailsPageWrapper() {
   const params = useParams();
@@ -15,6 +15,7 @@ export default function CarDetailsPageWrapper() {
 
   const [car, setCar] = useState<Car | null>(null);
   const [dealer, setDealer] = useState<Dealer | null>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [debugInfo, setDebugInfo] = useState<string>(''); // For debugging
@@ -38,10 +39,16 @@ export default function CarDetailsPageWrapper() {
           setCar(null);
         } else {
           setCar(carData);
-          setDebugInfo(`Car data loaded. Dealer reference: ${JSON.stringify(carData.dealer)}`);
           
-          // Enhanced dealer fetching logic with better logging
-          if (carData.dealer) {
+          // Infer listerType if it's missing (for backward compatibility)
+          const inferredListerType = carData.listerType || (carData.dealer ? 'dealer' : carData.user ? 'user' : null);
+          
+      
+          
+          setDebugInfo(`Car data loaded. Lister type: ${carData.listerType} (inferred: ${inferredListerType}). Dealer reference: ${JSON.stringify(carData.dealer)}. User reference: ${JSON.stringify(carData.user)}`);
+          
+          // Check if this is a dealer-listed car (use inferred type if original is missing)
+          if ((inferredListerType === 'dealer') && carData.dealer) {
             let dealerId: string;
             
             // Handle the case where dealer could be an object or string
@@ -70,8 +77,43 @@ export default function CarDetailsPageWrapper() {
             } else {
               setDebugInfo(prev => `${prev}\nDealer ID was empty after trimming.`);
             }
-          } else {
-            setDebugInfo(prev => `${prev}\nNo dealer reference found in car data.`);
+          }
+          
+          // Check if this is a user-listed car (use inferred type if original is missing)
+          else if ((inferredListerType === 'user') && carData.user) {
+            let userId: string;
+            
+            // Handle the case where user could be an object or string
+            if (typeof carData.user === 'string') {
+              userId = carData.user.trim();
+              setDebugInfo(prev => `${prev}\nUser ID (string): "${userId}"`);
+            } else if (typeof carData.user === 'object' && carData.user !== null) {
+              // If user is an object with _id or id property
+              userId = (carData.user._id || carData.user.id || '').toString().trim();
+              setDebugInfo(prev => `${prev}\nUser ID (from object): "${userId}"`);
+            } else {
+              setDebugInfo(prev => `${prev}\nUnable to extract user ID, type: ${typeof carData.user}`);
+              return;
+            }
+            
+            if (userId) {
+              try {
+                console.log(`Fetching user with ID: ${userId}`);
+                const userData = await getUserById(userId);
+                setUser(userData);
+                setDebugInfo(prev => `${prev}\nUser data loaded: ${JSON.stringify(userData)}`);
+              } catch (userErr) {
+                console.error(`Error fetching user details for user ID "${userId}":`, userErr);
+                setDebugInfo(prev => `${prev}\nError fetching user: ${userErr}`);
+              }
+            } else {
+              setDebugInfo(prev => `${prev}\nUser ID was empty after trimming.`);
+            }
+          }
+          
+          // Handle case where listerType is not set or invalid
+          else {
+            setDebugInfo(prev => `${prev}\nNo valid lister reference found. ListerType: ${carData.listerType} (inferred: ${inferredListerType})`);
           }
         }
       } catch (err) {
@@ -174,6 +216,7 @@ export default function CarDetailsPageWrapper() {
             <CarDetailsPage 
               car={car} 
               dealer={dealer} 
+              user={user}
             />
           </div>
         </div>

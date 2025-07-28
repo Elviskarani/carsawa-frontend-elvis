@@ -37,7 +37,7 @@ const Footer = () => {
             <h3 className="mb-4 font-bold" style={{ color: '#c1ff72' }}>Company</h3>
             <ul>
               <li className="mb-2"><Link href="/cars">Buy a Car</Link></li>
-              <li className="mb-2"><Link href="/sell-your-car">Sell Your Car</Link></li>
+              <li className="mb-2"><Link href="/sell-a-car">Sell Your Car</Link></li>
               <li className="mb-2"><a href="https://wa.me/254716937165" target="_blank" rel="noopener noreferrer">
                 Contact
               </a></li>

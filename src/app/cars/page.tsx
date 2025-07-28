@@ -104,17 +104,19 @@ function CarsContent() {
 
     // Handle mileage range
     if (filterValues.mileage) {
-      const mileageRange = filterValues.mileage.split('-');
-      if (mileageRange.length === 2) {
-        apiFilters.minMileage = parseInt(mileageRange[0]);
-        if (mileageRange[1] !== '+') {
+      if (filterValues.mileage.includes('+')) {
+        apiFilters.minMileage = parseInt(filterValues.mileage.replace('+', ''));
+      } else {
+        const mileageRange = filterValues.mileage.split('-');
+        if (mileageRange.length === 2) {
+          apiFilters.minMileage = parseInt(mileageRange[0]);
           apiFilters.maxMileage = parseInt(mileageRange[1]);
         }
       }
     }
 
     return apiFilters;
-  }, [currentPage]);
+  }, [currentPage, filters]);
 
   // Memoize API filters to optimize performance
   const apiFilters = useMemo(() => convertFiltersToAPI(filters), [filters, convertFiltersToAPI]);
@@ -144,8 +146,8 @@ function CarsContent() {
     }
   }, [apiFilters, currentPage]);
 
-  // Use useMemo to trigger fetch when filters change
-  useMemo(() => {
+  // Fetch cars when the component mounts or filters change
+  useEffect(() => {
     fetchCars();
   }, [fetchCars]);
 
@@ -161,6 +163,20 @@ function CarsContent() {
       setCurrentPage(pageNumber);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
+  };
+
+  // Helper function to get active filter summary
+  const getActiveFilterSummary = () => {
+    const activeFilters = [];
+    if (filters.search) activeFilters.push(`search: "${filters.search}"`);
+    if (filters.brand) activeFilters.push(`brand: ${filters.brand}`);
+    if (filters.bodyType) activeFilters.push(`type: ${filters.bodyType}`);
+    if (filters.price) activeFilters.push(`price: ${filters.price}`);
+    if (filters.mileage) activeFilters.push(`mileage: ${filters.mileage}`);
+    if (filters.fuelType) activeFilters.push(`fuel: ${filters.fuelType}`);
+    if (filters.transmission) activeFilters.push(`transmission: ${filters.transmission}`);
+    if (filters.modelYear) activeFilters.push(`year: ${filters.modelYear}`);
+    return activeFilters;
   };
 
   const renderPaginationNumbers = () => {
@@ -234,11 +250,11 @@ function CarsContent() {
           initialFilters={initialFilters}
         />
         
-        {/* Search Query Display */}
-        {filters.search && (
+        {/* Active Filters Display */}
+        {getActiveFilterSummary().length > 0 && (
           <div className="text-left lg:px-30 mb-4">
             <p className="text-gray-700 text-sm">
-              Search results for: <span className="font-semibold">"{filters.search}"</span>
+              <span className="font-semibold">Active filters:</span> {getActiveFilterSummary().join(', ')}
             </p>
           </div>
         )}
@@ -247,11 +263,13 @@ function CarsContent() {
         <div className="text-left lg:px-30 mb-8">
           <p className="text-gray-600 font-bold">
             {loading ? (
-              "Loading cars..."
+              "Searching cars..."
             ) : totalCars === 0 ? (
-              filters.search ? `No cars found for "${filters.search}"` : "No cars found"
+              <span className="text-red-600">
+                No cars found with current filters
+              </span>
             ) : (
-              `${totalCars} cars found${filters.search ? ` for "${filters.search}"` : ''}`
+              `${totalCars} car${totalCars !== 1 ? 's' : ''} found`
             )}
           </p>
         </div>
@@ -284,18 +302,27 @@ function CarsContent() {
                 ))}
               </div>
             ) : (
-              <div className="text-center py-16">
-                <p className="text-gray-500 text-lg">
-                  {filters.search 
-                    ? `No cars match your search for "${filters.search}"`
-                    : "No cars match your criteria"
-                  }
-                </p>
-                {filters.search && (
-                  <p className="text-gray-400 text-sm mt-2">
-                    Try adjusting your search terms or browse all cars
+              <div className="text-center py-16 bg-white rounded-xl shadow-sm">
+                <div className="max-w-md mx-auto">
+                  <div className="mb-4">
+                    <svg className="mx-auto h-16 w-16 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-6-4h6m2 5.291A7.962 7.962 0 0112 15c-2.34 0-4.29-1.175-5.5-2.709V6a2 2 0 012-2h7a2 2 0 012 2v6.291z" />
+                    </svg>
+                  </div>
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">No cars found</h3>
+                  <p className="text-gray-500 text-sm mb-4">
+                    We couldn't find any cars matching your current filters.
                   </p>
-                )}
+                  <div className="text-gray-400 text-xs space-y-1">
+                    <p>Try:</p>
+                    <ul className="list-disc list-inside space-y-1">
+                      <li>Removing some filters</li>
+                      <li>Changing your search terms</li>
+                      <li>Expanding your price or mileage range</li>
+                      <li>Selecting different brands or body types</li>
+                    </ul>
+                  </div>
+                </div>
               </div>
             )}
           </div>

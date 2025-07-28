@@ -5,6 +5,8 @@ export interface Car {
   _id?: string;
   id?: string;
   dealer: string | { _id?: string; id?: string; [key: string]: any };
+  user?: string | { _id?: string; id?: string; [key: string]: any };
+  listerType?: 'dealer' | 'user';
   name: string;
   make: string;
   model: string;
@@ -87,12 +89,13 @@ export interface ChangePasswordData {
 }
 
 export interface PaginatedCarResponse {
-  totalCars: number;
-  totalPages: number;
+  totalCars?: number;
+  totalPages?: number;
   cars: Car[];
   page: number;
   pages: number;
   total: number;
+  count?: number;
 }
 
 export interface PaginatedDealerResponse {
@@ -137,7 +140,7 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 export const TokenManager = {
   getToken: (): string | null => {
     if (typeof window !== 'undefined') {
-      return localStorage.getItem('token');
+      return localStorage.getItem('token') || sessionStorage.getItem('token');
     }
     return null;
   },
@@ -172,14 +175,25 @@ export const TokenManager = {
   },
 };
 
+// Update the fetchApi function to handle FormData properly
 async function fetchApi<T>(endpoint: string, options?: RequestInit): Promise<T> {
   const url = `${API_BASE_URL}/api${endpoint}`;
   const token = TokenManager.getToken();
 
-  const defaultHeaders: HeadersInit = {
-    'Content-Type': 'application/json',
-    ...(token && { Authorization: `Bearer ${token}` }),
-  };
+  // Handle FormData vs JSON differently
+  const isFormData = options?.body instanceof FormData;
+  
+  const defaultHeaders: HeadersInit = {};
+  
+  // Only add Content-Type for non-FormData requests
+  if (!isFormData) {
+    defaultHeaders['Content-Type'] = 'application/json';
+  }
+  
+  // Add authorization header if token exists
+  if (token) {
+    defaultHeaders['Authorization'] = `Bearer ${token}`;
+  }
 
   const requestOptions: RequestInit = {
     method: options?.method || 'GET',
@@ -220,6 +234,48 @@ export const logoutUser = async () => {
   return result;
 };
 export const isAuthenticated = () => TokenManager.isTokenValid();
+
+// User Management
+export const getUsers = (params?: { page?: number; pageSize?: number }) => {
+  const query = params ? `?${new URLSearchParams(params as any).toString()}` : '';
+  return fetchApi<{ users: User[]; page: number; pages: number; total: number }>(`/users${query}`);
+};
+
+export const getUserById = (id: string) => {
+  if (!id) return Promise.reject('User ID cannot be empty');
+  return fetchApi<User>(`/users/${id}`);
+};
+
+// User Car Management
+export const createUserCar = (data: FormData) => 
+  fetchApi<Car>('/cars/create', { 
+    method: 'POST', 
+    body: data 
+  });
+
+export const getUserCars = (userId: string, params?: { page?: number; pageSize?: number; status?: string }) => {
+  if (!userId) return Promise.reject('User ID cannot be empty');
+  const query = params ? `?${new URLSearchParams(params as any).toString()}` : '';
+  return fetchApi<PaginatedCarResponse>(`/users/${userId}/cars${query}`);
+};
+
+export const getMyCarListings = () => 
+  fetchApi<{ cars: Car[]; count: number }>('/cars/my-listings');
+
+export const updateUserCar = (carId: string, data: FormData) => 
+  fetchApi<Car>(`/cars/${carId}`, { 
+    method: 'PUT',
+    body: data 
+  });
+
+export const deleteUserCar = (carId: string) => 
+  fetchApi<{ message: string }>(`/cars/${carId}`, { method: 'DELETE' });
+
+export const updateUserCarStatus = (carId: string, status: string) => 
+  fetchApi<Car>(`/cars/${carId}/status`, { 
+    method: 'PUT', 
+    body: JSON.stringify({ status }) 
+  });
 
 // Cars
 export const getAllCars = (params?: Record<string, string | number>) => {

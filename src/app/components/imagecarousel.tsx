@@ -33,7 +33,7 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({ images }) => {
         <Image
           src={carImages[currentIndex]}
           alt={`Car image ${currentIndex + 1}`}
-          className="object-cover rounded-lg"
+          className="object-contain rounded-lg"
           fill
           priority
         />
