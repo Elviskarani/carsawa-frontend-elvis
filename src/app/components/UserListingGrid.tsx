@@ -110,7 +110,7 @@ const UserListingsGrid: React.FC = () => {
         <CarIcon className="w-12 h-12 text-gray-400 mx-auto mb-4" />
         <p className="text-gray-600 mb-4">You haven't listed any cars yet</p>
         <a
-          href="/sell"
+          href="/sell-a-car"
           className="inline-block px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
         >
           List Your First Car
