@@ -14,6 +14,7 @@ const CARS_PER_PAGE = 9;
 
 function CarsContent() {
   const [cars, setCars] = useState<Car[]>([]);
+  const [allCars, setAllCars] = useState<Car[]>([]); // Store all cars for client-side filtering
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalCars, setTotalCars] = useState(0);
@@ -49,109 +50,153 @@ function CarsContent() {
     });
   };
 
-  // Initialize filters with URL parameters using useMemo
+  // Initialize filters with URL parameters
   const initialFilters = useMemo(() => {
     const typeParam = searchParams.get('type');
     const makeParam = searchParams.get('make');
     const searchParam = searchParams.get('search');
+    const yearParam = searchParams.get('year');
     
     return {
       search: searchParam || '',
       bodyType: typeParam || '',
       brand: makeParam || '',
+      modelYear: yearParam || '',
       model: '',
       mileage: '',
       price: '',
       fuelType: '',
       color: '',
-      transmission: '',
-      modelYear: ''
+      transmission: ''
     };
   }, [searchParams]);
 
   // Set initial filters when URL parameters change
   useEffect(() => {
     setFilters(initialFilters);
-    setCurrentPage(1); // Reset to first page when URL parameters change
+    setCurrentPage(1);
   }, [initialFilters]);
 
-  // Convert filter values to API format
-  const convertFiltersToAPI = useCallback((filterValues: Filters): Record<string, string | number> => {
-    const apiFilters: Record<string, string | number> = {
-      page: currentPage,
-      pageSize: CARS_PER_PAGE,
-    };
+  // CLIENT-SIDE FILTERING LOGIC (based on your working example)
+  const filteredCars = useMemo(() => {
+    if (!allCars.length) return [];
 
-    // Convert filter values to API format
-    if (filterValues.search) apiFilters.search = filterValues.search;
-    if (filterValues.brand) apiFilters.make = filterValues.brand;
-    if (filterValues.model) apiFilters.model = filterValues.model;
-    if (filterValues.bodyType) apiFilters.bodyType = filterValues.bodyType;
-    if (filterValues.fuelType) apiFilters.fuelType = filterValues.fuelType;
-    if (filterValues.transmission) apiFilters.transmission = filterValues.transmission;
-    if (filterValues.modelYear) apiFilters.year = filterValues.modelYear;
+    return allCars.filter(car => {
+      // Search filter - searches in make, model, and other relevant fields
+      if (filters.search && filters.search.trim()) {
+        const searchTerm = filters.search.toLowerCase().trim();
+        const carText = `${car.make || ''} ${car.model || ''} ${car.bodyType || ''} ${car.fuelType || ''}`.toLowerCase();
+        if (!carText.includes(searchTerm)) return false;
+      }
 
-    // Handle price range
-    if (filterValues.price) {
-      const priceRange = filterValues.price.split('-');
-      if (priceRange.length === 2) {
-        apiFilters.minPrice = parseInt(priceRange[0]);
-        if (priceRange[1] !== '+') {
-          apiFilters.maxPrice = parseInt(priceRange[1]);
+      // Brand filter
+      if (filters.brand && car.make !== filters.brand) {
+        return false;
+      }
+
+      // Model filter
+      if (filters.model && car.model !== filters.model) {
+        return false;
+      }
+
+      // Body type filter
+      if (filters.bodyType && car.bodyType !== filters.bodyType) {
+        return false;
+      }
+
+      // Fuel type filter
+      if (filters.fuelType && car.fuelType !== filters.fuelType) {
+        return false;
+      }
+
+      // Transmission filter
+      if (filters.transmission && car.transmission !== filters.transmission) {
+        return false;
+      }
+
+      // Model year filter - FIXED
+      if (filters.modelYear && car.year && car.year.toString() !== filters.modelYear) {
+        return false;
+      }
+
+      // Price range filter
+      if (filters.price) {
+        const priceRange = filters.price.split('-');
+        if (priceRange.length === 2) {
+          const minPrice = parseInt(priceRange[0]);
+          if (priceRange[1] === '+') {
+            // Handle "20000000+" case
+            if (car.price < minPrice) return false;
+          } else {
+            const maxPrice = parseInt(priceRange[1]);
+            if (car.price < minPrice || car.price > maxPrice) return false;
+          }
         }
       }
-    }
 
-    // Handle mileage range
-    if (filterValues.mileage) {
-      if (filterValues.mileage.includes('+')) {
-        apiFilters.minMileage = parseInt(filterValues.mileage.replace('+', ''));
-      } else {
-        const mileageRange = filterValues.mileage.split('-');
+      // Mileage filter
+      if (filters.mileage) {
+        const mileageRange = filters.mileage.split('-');
         if (mileageRange.length === 2) {
-          apiFilters.minMileage = parseInt(mileageRange[0]);
-          apiFilters.maxMileage = parseInt(mileageRange[1]);
+          const minMileage = parseInt(mileageRange[0]);
+          if (mileageRange[1] === '+') {
+            // Handle "150000+" case
+            if (car.mileage < minMileage) return false;
+          } else {
+            const maxMileage = parseInt(mileageRange[1]);
+            if (car.mileage < minMileage || car.mileage > maxMileage) return false;
+          }
         }
       }
+
+      return true;
+    });
+  }, [allCars, filters]);
+
+  // Paginate filtered cars
+  const paginatedCars = useMemo(() => {
+    const startIndex = (currentPage - 1) * CARS_PER_PAGE;
+    const endIndex = startIndex + CARS_PER_PAGE;
+    return sortCarsByStatus(filteredCars.slice(startIndex, endIndex));
+  }, [filteredCars, currentPage]);
+
+  // Update pagination info when filtered cars change
+  useEffect(() => {
+    setTotalCars(filteredCars.length);
+    setTotalPages(Math.ceil(filteredCars.length / CARS_PER_PAGE));
+    
+    // Reset to first page if current page exceeds total pages
+    const newTotalPages = Math.ceil(filteredCars.length / CARS_PER_PAGE);
+    if (currentPage > newTotalPages && newTotalPages > 0) {
+      setCurrentPage(1);
     }
+  }, [filteredCars, currentPage]);
 
-    return apiFilters;
-  }, [currentPage, filters]);
-
-  // Memoize API filters to optimize performance
-  const apiFilters = useMemo(() => convertFiltersToAPI(filters), [filters, convertFiltersToAPI]);
-
-  // Fetch cars function
-  const fetchCars = useCallback(async () => {
+  // Fetch all cars initially (without pagination for client-side filtering)
+  const fetchAllCars = useCallback(async () => {
     setLoading(true);
     try {
-      console.log('Fetching cars with filters:', apiFilters);
-      const response = await getAllCars(apiFilters);
+      console.log('Fetching all cars...');
+      // Fetch with a large page size to get all cars
+      const response = await getAllCars({ page: 1, pageSize: 1000 });
       const fetchedCars = response.cars || [];
       
-      setTotalCars(response.total || 0);
-      setTotalPages(response.pages || 1);
-      setCars(sortCarsByStatus(fetchedCars));
-
-      if (currentPage > (response.pages || 1) && (response.pages || 1) > 0) {
-        setCurrentPage(response.pages || 1);
-      }
+      setAllCars(fetchedCars);
+      console.log(`Loaded ${fetchedCars.length} cars total`);
     } catch (err: any) {
       console.error("Error fetching cars:", err);
-      setCars([]);
-      setTotalCars(0);
-      setTotalPages(1);
+      setAllCars([]);
     } finally {
       setLoading(false);
     }
-  }, [apiFilters, currentPage]);
+  }, []);
 
-  // Fetch cars when the component mounts or filters change
+  // Fetch cars when component mounts
   useEffect(() => {
-    fetchCars();
-  }, [fetchCars]);
+    fetchAllCars();
+  }, [fetchAllCars]);
 
-  // Handle filter changes from the filter component
+  // Handle filter changes
   const handleFiltersChange = useCallback((newFilters: Filters) => {
     console.log('Filters changed:', newFilters);
     setFilters(newFilters);
@@ -168,7 +213,7 @@ function CarsContent() {
   // Helper function to get active filter summary
   const getActiveFilterSummary = () => {
     const activeFilters = [];
-    if (filters.search) activeFilters.push(`search: "${filters.search}"`);
+    if (filters.search && filters.search.trim()) activeFilters.push(`search: "${filters.search}"`);
     if (filters.brand) activeFilters.push(`brand: ${filters.brand}`);
     if (filters.bodyType) activeFilters.push(`type: ${filters.bodyType}`);
     if (filters.price) activeFilters.push(`price: ${filters.price}`);
@@ -298,7 +343,7 @@ function CarsContent() {
         <div className="text-left lg:px-30 mb-8">
           <p className="text-gray-600 font-bold">
             {loading ? (
-              "Searching cars..."
+              "Loading cars..."
             ) : totalCars === 0 ? (
               <span className="text-red-600">
                 No cars found with current filters
@@ -318,9 +363,9 @@ function CarsContent() {
                   <div key={`loading-${index}`} className="bg-white rounded-xl h-80 w-full animate-pulse"></div>
                 ))}
               </div>
-            ) : cars.length > 0 ? (
+            ) : paginatedCars.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                {cars.map((car) => (
+                {paginatedCars.map((car) => (
                   <div key={car._id || car.id || `${car.make}-${car.model}-${car.year}-${Math.random()}`} className="w-full">
                     <CarCard
                       {...car}

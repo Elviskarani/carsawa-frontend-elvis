@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Search, SlidersHorizontal, ChevronDown } from 'lucide-react';
 
 interface FilterOption {
@@ -47,6 +47,9 @@ export default function CarFilterComponent({ onFiltersChange, initialFilters = {
     ...initialFilters
   });
 
+  // IMPROVED: Debounced search to avoid too many updates
+  const [searchDebounceTimer, setSearchDebounceTimer] = useState<NodeJS.Timeout | null>(null);
+
   // Update filters when initialFilters change (from URL parameters)
   useEffect(() => {
     setFilters(prev => ({
@@ -55,14 +58,39 @@ export default function CarFilterComponent({ onFiltersChange, initialFilters = {
     }));
   }, [initialFilters]);
 
-  const handleFilterChange = (filterName: keyof Filters, value: string): void => {
+  // MAIN FILTER CHANGE HANDLER (based on working example)
+  const handleFilterChange = useCallback((filterName: keyof Filters, value: string): void => {
     const newFilters = {
       ...filters,
       [filterName]: value
     };
     setFilters(newFilters);
-    onFiltersChange(newFilters);
-  };
+
+    // For search, add debouncing to improve performance
+    if (filterName === 'search') {
+      if (searchDebounceTimer) {
+        clearTimeout(searchDebounceTimer);
+      }
+      
+      const timer = setTimeout(() => {
+        onFiltersChange(newFilters);
+      }, 300); // 300ms debounce delay
+      
+      setSearchDebounceTimer(timer);
+    } else {
+      // For other filters, apply immediately
+      onFiltersChange(newFilters);
+    }
+  }, [filters, onFiltersChange, searchDebounceTimer]);
+
+  // Cleanup debounce timer on unmount
+  useEffect(() => {
+    return () => {
+      if (searchDebounceTimer) {
+        clearTimeout(searchDebounceTimer);
+      }
+    };
+  }, [searchDebounceTimer]);
 
   const toggleMoreFilters = (): void => {
     setShowMoreFilters(!showMoreFilters);
@@ -83,7 +111,13 @@ export default function CarFilterComponent({ onFiltersChange, initialFilters = {
     };
     setFilters(clearedFilters);
     onFiltersChange(clearedFilters);
-    setShowMoreFilters(false); // Close more filters when clearing
+    setShowMoreFilters(false);
+    
+    // Clear any pending search debounce
+    if (searchDebounceTimer) {
+      clearTimeout(searchDebounceTimer);
+      setSearchDebounceTimer(null);
+    }
   };
 
   // Check if any filters are active
@@ -97,8 +131,8 @@ export default function CarFilterComponent({ onFiltersChange, initialFilters = {
         className="w-full h-12 px-4 pr-10 bg-white border border-gray-200 rounded-lg text-gray-700 appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
       >
         <option value="">{placeholder}</option>
-        {options.map((option, index) => (
-          <option key={index} value={option.value}>
+        {options.map((option) => (
+          <option key={option.value} value={option.value}>
             {option.label}
           </option>
         ))}
@@ -119,7 +153,7 @@ export default function CarFilterComponent({ onFiltersChange, initialFilters = {
     { value: 'Mercedes', label: 'Mercedes' },
     { value: 'Mercedes-Benz', label: 'Mercedes-Benz' },
     { value: 'Nissan', label: 'Nissan' },
-    { value: 'Toyota', label: 'Toyota' }, // Fixed capitalization
+    { value: 'Toyota', label: 'Toyota' },
     { value: 'Volkswagen', label: 'Volkswagen' },
     { value: 'Volvo', label: 'Volvo' },
     { value: 'Land Rover', label: 'Land Rover' },
@@ -128,7 +162,7 @@ export default function CarFilterComponent({ onFiltersChange, initialFilters = {
     { value: 'Porsche', label: 'Porsche' },
     { value: 'Rolls Royce', label: 'Rolls Royce' },
     { value: 'Jaguar', label: 'Jaguar' },
-    { value: 'McLaren', label: 'McLaren' }, // Fixed capitalization
+    { value: 'McLaren', label: 'McLaren' },
     { value: 'Mitsubishi', label: 'Mitsubishi' },
     { value: 'Jeep', label: 'Jeep' },
     { value: 'Chevrolet', label: 'Chevrolet' },
@@ -138,7 +172,7 @@ export default function CarFilterComponent({ onFiltersChange, initialFilters = {
     { value: 'Cadillac', label: 'Cadillac' },
     { value: 'Tesla', label: 'Tesla' },
     { value: 'BYD', label: 'BYD' }
-  ].sort((a, b) => a.label.localeCompare(b.label)); // Sort alphabetically
+  ].sort((a, b) => a.label.localeCompare(b.label));
 
   const bodyTypeOptions: FilterOption[] = [
     { value: 'SUV', label: 'SUV' },
@@ -161,7 +195,6 @@ export default function CarFilterComponent({ onFiltersChange, initialFilters = {
     { value: '150000+', label: '150,000+ km' }
   ];
 
-  // Fixed price options with proper KES formatting and realistic ranges
   const priceOptions: FilterOption[] = [
     { value: '0-500000', label: 'KES 0 - 500,000' },
     { value: '500000-1000000', label: 'KES 500,000 - 1,000,000' },
@@ -186,36 +219,52 @@ export default function CarFilterComponent({ onFiltersChange, initialFilters = {
   const transmissionOptions: FilterOption[] = [
     { value: 'Automatic', label: 'Automatic' },
     { value: 'Manual', label: 'Manual' },
-    { value: 'CVT', label: 'CVT' }, // Fixed capitalization
+    { value: 'CVT', label: 'CVT' },
     { value: 'Semi-Automatic', label: 'Semi-Automatic' }
   ];
 
-  const modelYearOptions: FilterOption[] = [
-    { value: '2024', label: '2024' },
-    { value: '2023', label: '2023' },
-    { value: '2022', label: '2022' },
-    { value: '2021', label: '2021' },
-    { value: '2020', label: '2020' },
-    { value: '2019', label: '2019' },
-    { value: '2018', label: '2018' },
-    { value: '2017', label: '2017' },
-    { value: '2016', label: '2016' },
-    { value: '2015', label: '2015' },
-    { value: '2014', label: '2014' },
-    { value: '2013', label: '2013' },
-    { value: '2012', label: '2012' },
-    { value: '2011', label: '2011' },
-    { value: '2010', label: '2010' }
-  ];
+  // FIXED: Model year options based on working example
+  const currentYear = new Date().getFullYear();
+  const modelYearOptions: FilterOption[] = [];
+  
+  // Generate years from current year down to 2000 for better coverage
+  for (let year = currentYear; year >= 2000; year--) {
+    modelYearOptions.push({
+      value: year.toString(),
+      label: year.toString()
+    });
+  }
+
+  // Helper function to get display label for filter values
+  const getFilterDisplayLabel = (filterName: keyof Filters, value: string): string => {
+    switch (filterName) {
+      case 'price':
+        return priceOptions.find(opt => opt.value === value)?.label || value;
+      case 'mileage':
+        return mileageOptions.find(opt => opt.value === value)?.label || value;
+      case 'modelYear':
+        return modelYearOptions.find(opt => opt.value === value)?.label || value;
+      case 'bodyType':
+        return bodyTypeOptions.find(opt => opt.value === value)?.label || value;
+      case 'fuelType':  
+        return fuelTypeOptions.find(opt => opt.value === value)?.label || value;
+      case 'transmission':
+        return transmissionOptions.find(opt => opt.value === value)?.label || value;
+      case 'brand':
+        return brandOptions.find(opt => opt.value === value)?.label || value;
+      default:
+        return value;
+    }
+  };
 
   return (
     <div className="w-full max-w-7xl mx-auto p-6 bg-gray-50 rounded-xl mb-8">
-      {/* Search Bar */}
+      {/* IMPROVED: Search Bar based on working example */}
       <div className="relative mb-6">
         <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
         <input
           type="text"
-          placeholder="Search your desired car (brand, model, etc.)"
+          placeholder="Search by brand, model, body type, fuel type, etc."
           value={filters.search}
           onChange={(e) => handleFilterChange('search', e.target.value)}
           className="w-full h-12 pl-12 pr-32 text-sm bg-white border border-gray-200 rounded-lg text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -276,6 +325,7 @@ export default function CarFilterComponent({ onFiltersChange, initialFilters = {
             onChange={(value) => handleFilterChange('transmission', value)}
             options={transmissionOptions}
           />
+          {/* FIXED: Model Year filter with proper handling */}
           <FilterSelect
             placeholder="Model Year"
             value={filters.modelYear}
@@ -290,7 +340,7 @@ export default function CarFilterComponent({ onFiltersChange, initialFilters = {
         <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
           <div className="flex flex-wrap gap-2 items-center mb-3">
             <span className="text-sm font-medium text-blue-800">Active Filters:</span>
-            {filters.search && (
+            {filters.search && filters.search.trim() && (
               <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                 Search: "{filters.search}"
                 <button
@@ -303,7 +353,7 @@ export default function CarFilterComponent({ onFiltersChange, initialFilters = {
             )}
             {filters.brand && (
               <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                Brand: {filters.brand}
+                Brand: {getFilterDisplayLabel('brand', filters.brand)}
                 <button
                   onClick={() => handleFilterChange('brand', '')}
                   className="ml-2 text-blue-600 hover:text-blue-800"
@@ -314,7 +364,7 @@ export default function CarFilterComponent({ onFiltersChange, initialFilters = {
             )}
             {filters.price && (
               <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                Price: {priceOptions.find(opt => opt.value === filters.price)?.label}
+                Price: {getFilterDisplayLabel('price', filters.price)}
                 <button
                   onClick={() => handleFilterChange('price', '')}
                   className="ml-2 text-blue-600 hover:text-blue-800"
@@ -325,7 +375,7 @@ export default function CarFilterComponent({ onFiltersChange, initialFilters = {
             )}
             {filters.mileage && (
               <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                Mileage: {filters.mileage}
+                Mileage: {getFilterDisplayLabel('mileage', filters.mileage)}
                 <button
                   onClick={() => handleFilterChange('mileage', '')}
                   className="ml-2 text-blue-600 hover:text-blue-800"
@@ -336,7 +386,7 @@ export default function CarFilterComponent({ onFiltersChange, initialFilters = {
             )}
             {filters.bodyType && (
               <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                Body: {filters.bodyType}
+                Body: {getFilterDisplayLabel('bodyType', filters.bodyType)}
                 <button
                   onClick={() => handleFilterChange('bodyType', '')}
                   className="ml-2 text-blue-600 hover:text-blue-800"
@@ -347,7 +397,7 @@ export default function CarFilterComponent({ onFiltersChange, initialFilters = {
             )}
             {filters.fuelType && (
               <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                Fuel: {filters.fuelType}
+                Fuel: {getFilterDisplayLabel('fuelType', filters.fuelType)}
                 <button
                   onClick={() => handleFilterChange('fuelType', '')}
                   className="ml-2 text-blue-600 hover:text-blue-800"
@@ -358,7 +408,7 @@ export default function CarFilterComponent({ onFiltersChange, initialFilters = {
             )}
             {filters.transmission && (
               <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                Transmission: {filters.transmission}
+                Transmission: {getFilterDisplayLabel('transmission', filters.transmission)}
                 <button
                   onClick={() => handleFilterChange('transmission', '')}
                   className="ml-2 text-blue-600 hover:text-blue-800"
@@ -369,7 +419,7 @@ export default function CarFilterComponent({ onFiltersChange, initialFilters = {
             )}
             {filters.modelYear && (
               <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                Year: {filters.modelYear}
+                Year: {getFilterDisplayLabel('modelYear', filters.modelYear)}
                 <button
                   onClick={() => handleFilterChange('modelYear', '')}
                   className="ml-2 text-blue-600 hover:text-blue-800"
