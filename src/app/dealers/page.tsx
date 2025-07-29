@@ -80,8 +80,7 @@ export default function DealersPage() {
 
       const formattedDealers: FormattedDealerForCard[] = data.dealers.map((dealer: Dealer) => {
         // Debug log to see the actual dealer data structure
-        console.log('Dealer data:', dealer);
-        console.log('Dealer location:', dealer.location);
+       
         
         return {
           _id: dealer._id,

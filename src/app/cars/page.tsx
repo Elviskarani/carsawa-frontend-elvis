@@ -193,16 +193,20 @@ function CarsContent() {
       startPage = Math.max(1, totalPages - maxPagesToShow + 1);
     }
 
+    const baseButtonClasses = "px-4 py-2 h-10 leading-tight text-gray-700 bg-white border border-gray-300 hover:bg-gray-200 hover:text-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-300";
+    const currentButtonClasses = "z-10 text-white bg-blue-600 border-blue-600 hover:bg-blue-700 focus:ring-blue-400";
+    const ellipsisClasses = "px-4 py-2 h-10 leading-tight text-gray-500 bg-white border border-gray-300";
+
     if (startPage > 1) {
       pageNumbers.push(
         <li key={1}>
-          <button onClick={() => paginate(1)} className="pagination-button">1</button>
+          <button onClick={() => paginate(1)} className={baseButtonClasses}>1</button>
         </li>
       );
       if (startPage > 2) {
         pageNumbers.push(
           <li key="start-ellipsis">
-            <span className="pagination-ellipsis">...</span>
+            <span className={ellipsisClasses}>...</span>
           </li>
         );
       }
@@ -213,7 +217,7 @@ function CarsContent() {
         <li key={i}>
           <button
             onClick={() => paginate(i)}
-            className={`pagination-button ${currentPage === i ? 'pagination-button-current' : ''}`}
+            className={`${baseButtonClasses} ${currentPage === i ? currentButtonClasses : ''}`}
             aria-current={currentPage === i ? 'page' : undefined}
           >
             {i}
@@ -226,13 +230,13 @@ function CarsContent() {
       if (endPage < totalPages - 1) {
         pageNumbers.push(
           <li key="end-ellipsis">
-            <span className="pagination-ellipsis">...</span>
+            <span className={ellipsisClasses}>...</span>
           </li>
         );
       }
       pageNumbers.push(
         <li key={totalPages}>
-          <button onClick={() => paginate(totalPages)} className="pagination-button">
+          <button onClick={() => paginate(totalPages)} className={baseButtonClasses}>
             {totalPages}
           </button>
         </li>
@@ -337,7 +341,7 @@ function CarsContent() {
                   <button
                     onClick={() => paginate(currentPage - 1)}
                     disabled={currentPage === 1}
-                    className="pagination-button rounded-l-full"
+                    className="px-4 py-2 h-10 leading-tight text-gray-700 bg-white border border-gray-300 rounded-l-full hover:bg-gray-200 hover:text-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-300"
                     aria-label="Previous page"
                   >
                     Previous
@@ -348,7 +352,7 @@ function CarsContent() {
                   <button
                     onClick={() => paginate(currentPage + 1)}
                     disabled={currentPage === totalPages}
-                    className="pagination-button rounded-r-full"
+                    className="px-4 py-2 h-10 leading-tight text-gray-700 bg-white border border-gray-300 rounded-r-full hover:bg-gray-200 hover:text-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-300"
                     aria-label="Next page"
                   >
                     Next
@@ -360,17 +364,6 @@ function CarsContent() {
         )}
       </div>
 
-      <style jsx global>{`
-        .pagination-button {
-          @apply px-4 py-2 h-10 leading-tight text-gray-700 bg-white border border-gray-300 hover:bg-gray-200 hover:text-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-300;
-        }
-        .pagination-button-current {
-          @apply z-10 text-white bg-blue-600 border-blue-600 hover:bg-blue-700 focus:ring-blue-400;
-        }
-        .pagination-ellipsis {
-          @apply px-4 py-2 h-10 leading-tight text-gray-500 bg-white border border-gray-300;
-        }
-      `}</style>
     </div>
   );
 }
