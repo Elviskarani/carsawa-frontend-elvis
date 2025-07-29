@@ -107,7 +107,7 @@ export default function CarFilterComponent({ onFiltersChange, initialFilters = {
     </div>
   );
 
-  // Sample options for dropdowns
+  // Fixed brand options - all consistently formatted
   const brandOptions: FilterOption[] = [
     { value: 'Audi', label: 'Audi' },
     { value: 'BMW', label: 'BMW' },
@@ -116,9 +116,9 @@ export default function CarFilterComponent({ onFiltersChange, initialFilters = {
     { value: 'Hyundai', label: 'Hyundai' },
     { value: 'Subaru', label: 'Subaru' },
     { value: 'Mazda', label: 'Mazda' },
-    { value: 'Mercedes-Benz', label: 'Mercedes-Benz' },
+    { value: 'Mercedes', label: 'Mercedes' },
     { value: 'Nissan', label: 'Nissan' },
-    { value: 'toyota', label: 'toyota' },
+    { value: 'Toyota', label: 'Toyota' }, // Fixed capitalization
     { value: 'Volkswagen', label: 'Volkswagen' },
     { value: 'Volvo', label: 'Volvo' },
     { value: 'Land Rover', label: 'Land Rover' },
@@ -127,8 +127,17 @@ export default function CarFilterComponent({ onFiltersChange, initialFilters = {
     { value: 'Porsche', label: 'Porsche' },
     { value: 'Rolls Royce', label: 'Rolls Royce' },
     { value: 'Jaguar', label: 'Jaguar' },
-    { value: 'Mclaren', label: 'Mclaren' }
-  ];
+    { value: 'McLaren', label: 'McLaren' }, // Fixed capitalization
+    { value: 'Mitsubishi', label: 'Mitsubishi' },
+    { value: 'Jeep', label: 'Jeep' },
+    { value: 'Chevrolet', label: 'Chevrolet' },
+    { value: 'Kia', label: 'Kia' },
+    { value: 'Infiniti', label: 'Infiniti' },
+    { value: 'Acura', label: 'Acura' },
+    { value: 'Cadillac', label: 'Cadillac' },
+    { value: 'Tesla', label: 'Tesla' },
+    { value: 'BYD', label: 'BYD' }
+  ].sort((a, b) => a.label.localeCompare(b.label)); // Sort alphabetically
 
   const bodyTypeOptions: FilterOption[] = [
     { value: 'SUV', label: 'SUV' },
@@ -138,35 +147,46 @@ export default function CarFilterComponent({ onFiltersChange, initialFilters = {
     { value: 'Wagon', label: 'Wagon' },
     { value: 'Van', label: 'Van' },
     { value: 'Sports', label: 'Sports' },
-    { value: 'Convertible', label: 'Convertible' }
+    { value: 'Convertible', label: 'Convertible' },
+    { value: 'Truck', label: 'Truck' },
+    { value: 'Crossover', label: 'Crossover' }
   ];
 
   const mileageOptions: FilterOption[] = [
-    { value: '0-25000', label: '0 - 25,000 kilometers' },
-    { value: '25000-50000', label: '25,000 - 50,000 kilometers' },
-    { value: '50000-100000', label: '50,000 - 100,000 kilometers' },
-    { value: '100000+', label: '100,000+ kilometers' }
+    { value: '0-25000', label: '0 - 25,000 km' },
+    { value: '25000-50000', label: '25,000 - 50,000 km' },
+    { value: '50000-100000', label: '50,000 - 100,000 km' },
+    { value: '100000-150000', label: '100,000 - 150,000 km' },
+    { value: '150000+', label: '150,000+ km' }
   ];
 
+  // Fixed price options with proper KES formatting and realistic ranges
   const priceOptions: FilterOption[] = [
-    { value: '0-1500000', label: '0 - 1,500,000' },
-    { value: '1500000-3000000', label: '1,500,000 - 3,000,000' },
-    { value: '3000000-5000000', label: '3,000,000 - 5,000,000' },
-    { value: '5000000+', label: '5,000,000+' }
+    { value: '0-500000', label: 'KES 0 - 500,000' },
+    { value: '500000-1000000', label: 'KES 500,000 - 1,000,000' },
+    { value: '1000000-2000000', label: 'KES 1,000,000 - 2,000,000' },
+    { value: '2000000-3000000', label: 'KES 2,000,000 - 3,000,000' },
+    { value: '3000000-5000000', label: 'KES 3,000,000 - 5,000,000' },
+    { value: '5000000-8000000', label: 'KES 5,000,000 - 8,000,000' },
+    { value: '8000000-12000000', label: 'KES 8,000,000 - 12,000,000' },
+    { value: '12000000-20000000', label: 'KES 12,000,000 - 20,000,000' },
+    { value: '20000000+', label: 'KES 20,000,000+' }
   ];
 
   const fuelTypeOptions: FilterOption[] = [
-    { value: 'gasoline', label: 'Gasoline' },
-    { value: 'hybrid', label: 'Hybrid' },
-    { value: 'electric', label: 'Electric' },
+    { value: 'Petrol', label: 'Petrol' },
+    { value: 'Gasoline', label: 'Gasoline' },
     { value: 'Diesel', label: 'Diesel' },
-    { value: 'Petrol', label: 'Petrol'}
+    { value: 'Hybrid', label: 'Hybrid' },
+    { value: 'Electric', label: 'Electric' },
+    { value: 'Plug-in Hybrid', label: 'Plug-in Hybrid' }
   ];
 
   const transmissionOptions: FilterOption[] = [
     { value: 'Automatic', label: 'Automatic' },
     { value: 'Manual', label: 'Manual' },
-    { value: 'cvt', label: 'CVT' }
+    { value: 'CVT', label: 'CVT' }, // Fixed capitalization
+    { value: 'Semi-Automatic', label: 'Semi-Automatic' }
   ];
 
   const modelYearOptions: FilterOption[] = [
@@ -179,7 +199,12 @@ export default function CarFilterComponent({ onFiltersChange, initialFilters = {
     { value: '2018', label: '2018' },
     { value: '2017', label: '2017' },
     { value: '2016', label: '2016' },
-    { value: '2015', label: '2015' }
+    { value: '2015', label: '2015' },
+    { value: '2014', label: '2014' },
+    { value: '2013', label: '2013' },
+    { value: '2012', label: '2012' },
+    { value: '2011', label: '2011' },
+    { value: '2010', label: '2010' }
   ];
 
   return (
@@ -214,16 +239,16 @@ export default function CarFilterComponent({ onFiltersChange, initialFilters = {
           options={brandOptions}
         />
         <FilterSelect
+          placeholder="Price Range"
+          value={filters.price}
+          onChange={(value) => handleFilterChange('price', value)}
+          options={priceOptions}
+        />
+        <FilterSelect
           placeholder="Mileage"
           value={filters.mileage}
           onChange={(value) => handleFilterChange('mileage', value)}
           options={mileageOptions}
-        />
-        <FilterSelect
-          placeholder="Price"
-          value={filters.price}
-          onChange={(value) => handleFilterChange('price', value)}
-          options={priceOptions}
         />
       </div>
 
@@ -259,12 +284,104 @@ export default function CarFilterComponent({ onFiltersChange, initialFilters = {
         </div>
       </div>
 
-      {/* Action Buttons */}
+      {/* Active Filters Display */}
       {hasActiveFilters && (
-        <div className="mt-4 flex justify-center gap-4">
+        <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+          <div className="flex flex-wrap gap-2 items-center mb-3">
+            <span className="text-sm font-medium text-blue-800">Active Filters:</span>
+            {filters.search && (
+              <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                Search: "{filters.search}"
+                <button
+                  onClick={() => handleFilterChange('search', '')}
+                  className="ml-2 text-blue-600 hover:text-blue-800"
+                >
+                  ×
+                </button>
+              </span>
+            )}
+            {filters.brand && (
+              <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                Brand: {filters.brand}
+                <button
+                  onClick={() => handleFilterChange('brand', '')}
+                  className="ml-2 text-blue-600 hover:text-blue-800"
+                >
+                  ×
+                </button>
+              </span>
+            )}
+            {filters.price && (
+              <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                Price: {priceOptions.find(opt => opt.value === filters.price)?.label}
+                <button
+                  onClick={() => handleFilterChange('price', '')}
+                  className="ml-2 text-blue-600 hover:text-blue-800"
+                >
+                  ×
+                </button>
+              </span>
+            )}
+            {filters.mileage && (
+              <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                Mileage: {filters.mileage}
+                <button
+                  onClick={() => handleFilterChange('mileage', '')}
+                  className="ml-2 text-blue-600 hover:text-blue-800"
+                >
+                  ×
+                </button>
+              </span>
+            )}
+            {filters.bodyType && (
+              <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                Body: {filters.bodyType}
+                <button
+                  onClick={() => handleFilterChange('bodyType', '')}
+                  className="ml-2 text-blue-600 hover:text-blue-800"
+                >
+                  ×
+                </button>
+              </span>
+            )}
+            {filters.fuelType && (
+              <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                Fuel: {filters.fuelType}
+                <button
+                  onClick={() => handleFilterChange('fuelType', '')}
+                  className="ml-2 text-blue-600 hover:text-blue-800"
+                >
+                  ×
+                </button>
+              </span>
+            )}
+            {filters.transmission && (
+              <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                Transmission: {filters.transmission}
+                <button
+                  onClick={() => handleFilterChange('transmission', '')}
+                  className="ml-2 text-blue-600 hover:text-blue-800"
+                >
+                  ×
+                </button>
+              </span>
+            )}
+            {filters.modelYear && (
+              <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                Year: {filters.modelYear}
+                <button
+                  onClick={() => handleFilterChange('modelYear', '')}
+                  className="ml-2 text-blue-600 hover:text-blue-800"
+                >
+                  ×
+                </button>
+              </span>
+            )}
+          </div>
+          
           <button
             onClick={clearFilters}
-            className="px-6 py-2 bg-red-100 text-red-700 font-medium text-sm rounded-lg hover:bg-red-200 transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+            className="px-4 py-2 bg-red-100 text-red-700 font-medium text-sm rounded-lg hover:bg-red-200 transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
           >
             Clear All Filters
           </button>

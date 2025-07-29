@@ -193,32 +193,52 @@ function CarsContent() {
       startPage = Math.max(1, totalPages - maxPagesToShow + 1);
     }
 
-    const baseButtonClasses = "px-4 py-2 h-10 leading-tight text-gray-700 bg-white border border-gray-300 hover:bg-gray-200 hover:text-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-300";
-    const currentButtonClasses = "z-10 text-white bg-blue-600 border-blue-600 hover:bg-blue-700 focus:ring-blue-400";
-    const ellipsisClasses = "px-4 py-2 h-10 leading-tight text-gray-500 bg-white border border-gray-300";
+    // Modern button styles with improved hover and active states
+    const baseButtonClasses = "relative px-4 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 hover:text-gray-900 hover:border-gray-400 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:z-10 select-none min-w-[44px] flex items-center justify-center";
+    const currentButtonClasses = "z-10 text-white bg-gradient-to-r from-blue-600 to-blue-700 border-blue-600 hover:from-blue-700 hover:to-blue-800 hover:border-blue-700 shadow-lg transform hover:scale-105 focus:ring-blue-400";
+    const ellipsisClasses = "px-4 py-2.5 text-sm text-gray-400 bg-white border border-gray-300 cursor-default min-w-[44px] flex items-center justify-center";
 
+    // Add first page and ellipsis if needed
     if (startPage > 1) {
       pageNumbers.push(
-        <li key={1}>
-          <button onClick={() => paginate(1)} className={baseButtonClasses}>1</button>
+        <li key={1} className="transition-transform duration-200 hover:scale-105">
+          <button
+            onClick={() => paginate(1)}
+            className={`${baseButtonClasses} rounded-l-lg`}
+            aria-label="Go to page 1"
+          >
+            1
+          </button>
         </li>
       );
       if (startPage > 2) {
         pageNumbers.push(
           <li key="start-ellipsis">
-            <span className={ellipsisClasses}>...</span>
+            <span className={ellipsisClasses} aria-label="More pages">
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <circle cx="4" cy="10" r="1.5" />
+                <circle cx="10" cy="10" r="1.5" />
+                <circle cx="16" cy="10" r="1.5" />
+              </svg>
+            </span>
           </li>
         );
       }
     }
 
+    // Add page numbers
     for (let i = startPage; i <= endPage; i++) {
+      const isFirst = i === startPage && startPage === 1;
+      const isLast = i === endPage && endPage === totalPages;
+      const roundedClasses = isFirst ? 'rounded-l-lg' : isLast ? 'rounded-r-lg' : '';
+      
       pageNumbers.push(
-        <li key={i}>
+        <li key={i} className="transition-transform duration-200 hover:scale-105">
           <button
             onClick={() => paginate(i)}
-            className={`${baseButtonClasses} ${currentPage === i ? currentButtonClasses : ''}`}
+            className={`${baseButtonClasses} ${roundedClasses} ${currentPage === i ? currentButtonClasses : ''}`}
             aria-current={currentPage === i ? 'page' : undefined}
+            aria-label={`Go to page ${i}`}
           >
             {i}
           </button>
@@ -226,17 +246,28 @@ function CarsContent() {
       );
     }
 
+    // Add ellipsis and last page if needed
     if (endPage < totalPages) {
       if (endPage < totalPages - 1) {
         pageNumbers.push(
           <li key="end-ellipsis">
-            <span className={ellipsisClasses}>...</span>
+            <span className={ellipsisClasses} aria-label="More pages">
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <circle cx="4" cy="10" r="1.5" />
+                <circle cx="10" cy="10" r="1.5" />
+                <circle cx="16" cy="10" r="1.5" />
+              </svg>
+            </span>
           </li>
         );
       }
       pageNumbers.push(
-        <li key={totalPages}>
-          <button onClick={() => paginate(totalPages)} className={baseButtonClasses}>
+        <li key={totalPages} className="transition-transform duration-200 hover:scale-105">
+          <button
+            onClick={() => paginate(totalPages)}
+            className={`${baseButtonClasses} rounded-r-lg`}
+            aria-label={`Go to page ${totalPages}`}
+          >
             {totalPages}
           </button>
         </li>
@@ -332,38 +363,80 @@ function CarsContent() {
           </div>
         </div>
 
-        {/* Pagination */}
+        {/* Modern Pagination */}
         {!loading && totalCars > 0 && totalPages > 1 && (
-          <div className="flex justify-center mt-12">
-            <nav aria-label="Pagination">
-              <ul className="inline-flex items-center -space-x-px shadow-sm rounded-md">
-                <li>
-                  <button
-                    onClick={() => paginate(currentPage - 1)}
-                    disabled={currentPage === 1}
-                    className="px-4 py-2 h-10 leading-tight text-gray-700 bg-white border border-gray-300 rounded-l-full hover:bg-gray-200 hover:text-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-300"
-                    aria-label="Previous page"
-                  >
-                    Previous
-                  </button>
-                </li>
-                {renderPaginationNumbers()}
-                <li>
-                  <button
-                    onClick={() => paginate(currentPage + 1)}
-                    disabled={currentPage === totalPages}
-                    className="px-4 py-2 h-10 leading-tight text-gray-700 bg-white border border-gray-300 rounded-r-full hover:bg-gray-200 hover:text-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-300"
-                    aria-label="Next page"
-                  >
-                    Next
-                  </button>
-                </li>
-              </ul>
-            </nav>
+          <div className="flex flex-col items-center mt-12 space-y-4">
+            {/* Pagination Info */}
+            <div className="text-sm text-gray-600 font-medium">
+              Showing page <span className="font-bold text-gray-900">{currentPage}</span> of{' '}
+              <span className="font-bold text-gray-900">{totalPages}</span>
+              {' '}({totalCars} total cars)
+            </div>
+            
+            {/* Pagination Controls */}
+            <div className="flex flex-col sm:flex-row items-center gap-4">
+              {/* Previous Button */}
+              <button
+                onClick={() => paginate(currentPage - 1)}
+                disabled={currentPage === 1}
+                className="group flex items-center gap-2 px-6 py-3 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:text-gray-900 hover:border-gray-400 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 shadow-sm hover:shadow-md"
+                aria-label="Previous page"
+              >
+                <svg className="w-4 h-4 transform group-hover:-translate-x-0.5 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+                Previous
+              </button>
+
+              {/* Page Numbers */}
+              <nav aria-label="Pagination" className="hidden sm:block">
+                <ul className="flex items-center shadow-sm rounded-lg overflow-hidden border border-gray-300 bg-white">
+                  {renderPaginationNumbers()}
+                </ul>
+              </nav>
+
+              {/* Mobile Page Indicator */}
+              <div className="sm:hidden">
+                <div className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg">
+                  {currentPage} / {totalPages}
+                </div>
+              </div>
+
+              {/* Next Button */}
+              <button
+                onClick={() => paginate(currentPage + 1)}
+                disabled={currentPage === totalPages}
+                className="group flex items-center gap-2 px-6 py-3 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:text-gray-900 hover:border-gray-400 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 shadow-sm hover:shadow-md"
+                aria-label="Next page"
+              >
+                Next
+                <svg className="w-4 h-4 transform group-hover:translate-x-0.5 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Quick Jump (for many pages) */}
+            {totalPages > 10 && (
+              <div className="flex items-center gap-2 text-sm">
+                <span className="text-gray-600">Jump to page:</span>
+                <select
+                  value={currentPage}
+                  onChange={(e) => paginate(parseInt(e.target.value))}
+                  className="px-3 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+                  aria-label="Jump to page"
+                >
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                    <option key={page} value={page}>
+                      {page}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
           </div>
         )}
       </div>
-
     </div>
   );
 }
