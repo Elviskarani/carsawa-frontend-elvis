@@ -12,7 +12,7 @@ export interface CarDataPageProps {
 
 const CarDetailsPage: React.FC<CarDataPageProps> = ({ car, dealer, user }) => {
   // Create a formatted title from car data
-  const title = `${car.year || ''} ${car.name || ''} ${car.make || ''} ${car.model || ''}`.trim() || "Car Details";
+  const title = `${car.year || ''} ${car.make || ''} ${car.model || ''}`.trim() || "Car Details";
 
   // Determine if this is a user or dealer listing (with fallback for missing listerType)
   const inferredListerType = car.listerType || (car.dealer ? 'dealer' : car.user ? 'user' : null);
