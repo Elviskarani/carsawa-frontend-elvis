@@ -117,6 +117,7 @@ export default function CarFilterComponent({ onFiltersChange, initialFilters = {
     { value: 'Subaru', label: 'Subaru' },
     { value: 'Mazda', label: 'Mazda' },
     { value: 'Mercedes', label: 'Mercedes' },
+    { value: 'Mercedes-Benz', label: 'Mercedes-Benz' },
     { value: 'Nissan', label: 'Nissan' },
     { value: 'Toyota', label: 'Toyota' }, // Fixed capitalization
     { value: 'Volkswagen', label: 'Volkswagen' },
