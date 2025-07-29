@@ -337,7 +337,7 @@ function CarsContent() {
                   <button
                     onClick={() => paginate(currentPage - 1)}
                     disabled={currentPage === 1}
-                    className="pagination-button rounded-l-md"
+                    className="pagination-button rounded-l-full"
                     aria-label="Previous page"
                   >
                     Previous
@@ -348,7 +348,7 @@ function CarsContent() {
                   <button
                     onClick={() => paginate(currentPage + 1)}
                     disabled={currentPage === totalPages}
-                    className="pagination-button rounded-r-md"
+                    className="pagination-button rounded-r-full"
                     aria-label="Next page"
                   >
                     Next
@@ -362,10 +362,10 @@ function CarsContent() {
 
       <style jsx global>{`
         .pagination-button {
-          @apply px-4 py-2 h-10 leading-tight text-gray-600 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-150;
+          @apply px-4 py-2 h-10 leading-tight text-gray-700 bg-white border border-gray-300 hover:bg-gray-200 hover:text-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-300;
         }
         .pagination-button-current {
-          @apply z-10 text-blue-600 bg-blue-50 border-blue-300 hover:bg-blue-100 hover:text-blue-700;
+          @apply z-10 text-white bg-blue-600 border-blue-600 hover:bg-blue-700 focus:ring-blue-400;
         }
         .pagination-ellipsis {
           @apply px-4 py-2 h-10 leading-tight text-gray-500 bg-white border border-gray-300;
