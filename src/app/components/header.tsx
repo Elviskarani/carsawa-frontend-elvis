@@ -28,20 +28,25 @@ const NavLink = ({
   return (
     <Link
       href={href}
-      className={`
-        relative text-sm font-medium leading-normal
-        after:content-[''] after:absolute after:left-0 after:bottom-0
-        after:h-[2px] ${isActive ? 'after:w-full' : 'after:w-0'}
-        after:bg-current hover:after:w-full
-        after:transition-all after:duration-300
-        ${textColor}
-      `}
       onClick={onClick}
+      className={`text-sm font-medium leading-normal ${textColor}`}
     >
-      {children}
+      <span
+        className={`
+          relative inline-block
+          after:content-[''] after:absolute after:left-0 after:bottom-0
+          after:h-[2px] after:bg-current after:w-full
+          after:transition-transform after:duration-300
+          ${isActive ? 'after:scale-x-100' : 'after:scale-x-0'}
+          after:origin-left hover:after:scale-x-100
+        `}
+      >
+        {children}
+      </span>
     </Link>
   )
 }
+
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -192,12 +197,48 @@ const Header = () => {
                   priority
                 />
               </div>
-              <h2 className={`text-base sm:text-lg font-bold leading-tight tracking-[-0.015em] ${getTextColor()}`}>
-                Carsawa
-              </h2>
             </Link>
+          </div>
 
-            {/* Mobile Menu Button - positioned next to logo */}
+          {/* Center: Nav - Desktop only */}
+          <div className="hidden lg:flex justify-center gap-5 flex-1">
+            <NavLink href="/cars" pathname={pathname} textColor={getTextColor()}>
+              Buy
+            </NavLink>
+            <NavLink href="/dealers" pathname={pathname} textColor={getTextColor()}>
+              View Dealerships
+            </NavLink>
+            <NavLink href="/sell-a-car" pathname={pathname} textColor={getTextColor()}>
+              Sell
+            </NavLink>
+            <NavLink href="/account" pathname={pathname} textColor={getTextColor()}>
+              Account
+            </NavLink>
+          </div>
+
+      
+          <div className="flex justify-end items-center gap-5 flex-1">
+            {/* Sign In/User Icon - Both Desktop and Mobile */}
+            <div
+              className={`flex border rounded p-2 gap-2 items-center hover:bg-opacity-5 hover:bg-[#a2d462] transition-colors cursor-pointer ${getSignInBorder()}`}
+              onClick={handleSignInClick}
+            >
+              <User size={18} className={getIconColor()} />
+              {!isAuthenticated && (
+                <h2 className={`text-sm hidden lg:block ${getTextColor()}`}>
+                  Sign In
+                </h2>
+              )}
+            </div>
+
+            {/* Phone - Desktop only */}
+            <div className="hidden md:flex gap-2 items-center">
+              <PhoneCall size={18} className={getIconColor()} />
+              <h2 className={`text-sm ${getTextColor()}`}>
+                +254791001601
+              </h2>
+            </div>
+
             <button
               onClick={toggleMenu}
               className={`lg:hidden p-2 rounded-md transition-colors ${getMobileMenuButtonStyle()}`}
@@ -228,97 +269,59 @@ const Header = () => {
               </svg>
             </button>
           </div>
-
-          {/* Center: Nav - Desktop only */}
-          <div className="hidden lg:flex justify-center gap-5 flex-1">
-            <NavLink href="/cars" pathname={pathname} textColor={getTextColor()}>
-              Buy
-            </NavLink>
-            <NavLink href="/dealers" pathname={pathname} textColor={getTextColor()}>
-              View Dealerships
-            </NavLink>
-            <NavLink href="/sell-a-car" pathname={pathname} textColor={getTextColor()}>
-              Sell
-            </NavLink>
-            <NavLink href="/account" pathname={pathname} textColor={getTextColor()}>
-              Account
-            </NavLink>
-          </div>
-
-          {/* Right: Sign In + Phone - Desktop and Mobile */}
-          <div className="flex justify-end items-center gap-5 flex-1">
-            {/* Sign In/User Icon - Both Desktop and Mobile */}
-            <div
-              className={`flex border rounded p-2 gap-2 items-center hover:bg-opacity-5 hover:bg-[#a2d462] transition-colors cursor-pointer ${getSignInBorder()}`}
-              onClick={handleSignInClick}
-            >
-              <User size={18} className={getIconColor()} />
-              {!isAuthenticated && (
-                <h2 className={`text-sm hidden lg:block ${getTextColor()}`}>
-                  Sign In
-                </h2>
-              )}
-            </div>
-
-            {/* Phone - Desktop only */}
-            <div className="hidden md:flex gap-2 items-center">
-              <PhoneCall size={18} className={getIconColor()} />
-              <h2 className={`text-sm ${getTextColor()}`}>
-                +254791001601
-              </h2>
-            </div>
-          </div>
         </div>
 
-        {/* Mobile Navigation Menu */}
-        {isMenuOpen && (
-          <nav className={`lg:hidden px-4 py-4 ${getMobileMenuBackground()}`}>
-            <div className="flex flex-col space-y-4">
-              <NavLink
-                href="/cars"
-                pathname={pathname}
-                textColor="text-black"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Buy
-              </NavLink>
-              <NavLink
-                href="/sell-a-car"
-                pathname={pathname}
-                textColor="text-black"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Sell
-              </NavLink>
-              <NavLink
-                href="/account"
-                pathname={pathname}
-                textColor="text-black"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Account
-              </NavLink>
-              <NavLink
-                href="/dealers"
-                pathname={pathname}
-                textColor="text-black"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                View Dealerships
-              </NavLink>
-              
+     {isMenuOpen && (
+  <nav
+    className={`lg:hidden absolute top-[100%] right-2 w-30 rounded-md shadow-lg px-4 py-4 z-50 ${getMobileMenuBackground()}`}
+  >
+    <div className="flex flex-col space-y-4">
+      <NavLink
+        href="/cars"
+        pathname={pathname}
+        textColor="text-black"
+        onClick={() => setIsMenuOpen(false)}
+      >
+        Buy
+      </NavLink>
+      <NavLink
+        href="/sell-a-car"
+        pathname={pathname}
+        textColor="text-black"
+        onClick={() => setIsMenuOpen(false)}
+      >
+        Sell
+      </NavLink>
+      <NavLink
+        href="/account"
+        pathname={pathname}
+        textColor="text-black"
+        onClick={() => setIsMenuOpen(false)}
+      >
+        Account
+      </NavLink>
+      <NavLink
+        href="/dealers"
+        pathname={pathname}
+        textColor="text-black"
+        onClick={() => setIsMenuOpen(false)}
+      >
+        Dealerships
+      </NavLink>
 
-              <div className={`border-t pt-4 mt-4 sm:hidden ${getMobileBorderColor()}`}>
-                <div className="flex items-center gap-2 py-2">
-                  <PhoneCall size={18} className="text-black" />
-                  <span className="text-sm text-black">
-                    +254791001601
-                  </span>
-                </div>
-              </div>
-            </div>
-          </nav>
-        )}
+      <div className={`border-t pt-2  sm:hidden ${getMobileBorderColor()}`}>
+        <a 
+        href='tel:0791001601'
+        className="flex items-center gap-2 py-2">
+          <PhoneCall size={15} className="text-black" />
+          <span className="text-sm text-black">Support </span>
+        </a>
+      </div>
+    </div>
+  </nav>
+)}
+
+
       </header>
 
       <AuthModal
