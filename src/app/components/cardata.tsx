@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { FaWhatsapp, FaPhoneAlt, FaUser, FaEnvelope } from 'react-icons/fa';
+import { FaWhatsapp, FaPhoneAlt, FaUser, FaEnvelope, FaShieldAlt } from 'react-icons/fa';
 import { Car, Dealer, User } from '@/app/services/api';
 
 export interface CarDataPageProps {
@@ -191,6 +191,26 @@ const CarDetailsPage: React.FC<CarDataPageProps> = ({ car, dealer, user }) => {
                   </div>
                 </button>
               )}
+
+              {/* Book Inspection Button for Dealers */}
+              <button
+                className="flex-1 bg-orange-500 text-white py-4 rounded-lg flex items-center justify-center space-x-3 hover:bg-orange-600 transition shadow-md"
+                onClick={() => {
+                  const inspectionMessage = `Hi, I would like to book an inspection for this car:\n\n${title}\nPrice: ${car.price ? formatPrice(car.price) : 'N/A'}\nYear: ${car.year || 'N/A'}\nMake: ${car.make || 'N/A'}\nModel: ${car.model || 'N/A'}\nMileage: ${car.mileage ? `${car.mileage.toLocaleString()} km` : 'N/A'}\n\nPlease let me know available times for inspection.`;
+                  window.open(
+                    `https://wa.me/254791001601?text=${encodeURIComponent(inspectionMessage)}`,
+                    '_blank'
+                  );
+                }}
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                </svg>
+                <div className="text-left">
+                  <div className="text-sm font-semibold">Book Inspection</div>
+                  <div className="text-xs opacity-90">Schedule a viewing</div>
+                </div>
+              </button>
             </>
           ) : (
             <>
@@ -235,6 +255,32 @@ const CarDetailsPage: React.FC<CarDataPageProps> = ({ car, dealer, user }) => {
               </button>
             </>
           )}
+        </div>
+
+        {/* Safety Tips Section */}
+        <div className="mb-6 bg-amber-50 border border-amber-200 rounded-lg p-4">
+          <div className="flex items-center mb-3">
+            <FaShieldAlt className="text-amber-600 mr-2" />
+            <h3 className="font-bold text-amber-800">Safety Tips</h3>
+          </div>
+          <ul className="space-y-2 text-sm text-amber-800">
+            <li className="flex items-start">
+              <span className="text-amber-600 mr-2 mt-0.5">•</span>
+              <span>Avoid sending any prepayments</span>
+            </li>
+            <li className="flex items-start">
+              <span className="text-amber-600 mr-2 mt-0.5">•</span>
+              <span>Meet with the seller at a safe public place</span>
+            </li>
+            <li className="flex items-start">
+              <span className="text-amber-600 mr-2 mt-0.5">•</span>
+              <span>Book a prepurchase inspection above so you can buy with confidence and know exactly what you're paying for</span>
+            </li>
+            <li className="flex items-start">
+              <span className="text-amber-600 mr-2 mt-0.5">•</span>
+              <span>Check all the docs and only pay if you're satisfied</span>
+            </li>
+          </ul>
         </div>
 
         {/* Features & Specifications Section */}
