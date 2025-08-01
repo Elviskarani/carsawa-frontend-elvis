@@ -54,7 +54,7 @@ const Footer = () => {
                 <a href="tel:0791001601" style={{ color: '#c1ff72' }}>0791001601</a>
               </p>
               
-              <p className="mb-1">CarSawa Ruiru <span style={{ color: '#c1ff72' }}>Now Open</span></p>
+              <p className="mb-1">Nairobi <span style={{ color: '#c1ff72' }}>Now Open</span></p>
               <p><a href="https://wa.me/254716937165" target="_blank" rel="noopener noreferrer" style={{ color: '#c1ff72' }}>Contact Us</a></p>
             </div>
           </div>
@@ -64,13 +64,13 @@ const Footer = () => {
         <div className="mt-8 pt-8 border-t border-gray-800 flex flex-col md:flex-row justify-between items-center">
           <p>© Carsawa 2025 All rights reserved</p>
           <div className="flex items-center mt-4 md:mt-0">
-            <p className="mr-2">Curated by</p>
-            <a href="#" className="font-medium" style={{ color: '#c1ff72' }}>BluePrint Studio</a>
+            <p className="mr-2">Site powered by</p>
+            <a href="#" className="font-medium" style={{ color: '#c1ff72' }}>Carsawa</a>
           </div>
           <div className="flex space-x-4 mt-4 md:mt-0">
             <a href="#" className="hover:text-gray-400"><FaTwitter /></a>
             <a href="#" className="hover:text-gray-400"><FaYoutube /></a>
-            <a href="#" className="hover:text-gray-400"><FaInstagram /></a>
+            <a href="https://www.instagram.com/carsawakenya/" className="hover:text-gray-400"><FaInstagram /></a>
           </div>
         </div>
       </div>
