@@ -57,6 +57,8 @@ const Footer = () => {
               
               <p className="mb-1">Nairobi <span style={{ color: '#c1ff72' }}>Now Open</span></p>
               <p><a href="https://wa.me/254716937165" target="_blank" rel="noopener noreferrer" style={{ color: '#c1ff72' }}>Contact Us</a></p>
+              <a href="tel:0791001601" style={{ color: 'white' }}>support@carsawa.africa</a>
+
             </div>
           </div>
         </div>
