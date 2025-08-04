@@ -49,7 +49,11 @@ export default function RootLayout({
             gtag('config', 'G-YWJHW5T8WT');
           `}
         </Script>
-
+        <script dangerouslySetInnerHTML={{
+          __html: `
+            (function(){if(!window.chatbase||window.chatbase("getState")!=="initialized"){window.chatbase=(...arguments)=>{if(!window.chatbase.q){window.chatbase.q=[]}window.chatbase.q.push(arguments)};window.chatbase=new Proxy(window.chatbase,{get(target,prop){if(prop==="q"){return target.q}return(...args)=>target(prop,...args)}})}const onLoad=function(){const script=document.createElement("script");script.src="https://www.chatbase.co/embed.min.js";script.id="87I5NajdLL4Wc8y1jeTKF";script.domain="www.chatbase.co";document.body.appendChild(script)};if(document.readyState==="complete"){onLoad()}else{window.addEventListener("load",onLoad)}})();
+          `
+        }} />
         <Header/>
         {children}
         <Footer/>
