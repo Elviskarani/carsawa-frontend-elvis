@@ -1,6 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { FaTwitter, FaYoutube, FaInstagram } from 'react-icons/fa';
+import { FaXTwitter } from "react-icons/fa6";
 
 const Footer = () => {
   return (
@@ -68,8 +69,8 @@ const Footer = () => {
             <a href="#" className="font-medium" style={{ color: '#c1ff72' }}>Carsawa</a>
           </div>
           <div className="flex space-x-4 mt-4 md:mt-0">
-            <a href="#" className="hover:text-gray-400"><FaTwitter /></a>
-            <a href="#" className="hover:text-gray-400"><FaYoutube /></a>
+            <a href="https://x.com/carsawake" className="hover:text-gray-400"><FaXTwitter /></a>
+            <a href="https://www.youtube.com/@carsawakenya" className="hover:text-gray-400"><FaYoutube /></a>
             <a href="https://www.instagram.com/carsawakenya/" className="hover:text-gray-400"><FaInstagram /></a>
           </div>
         </div>
