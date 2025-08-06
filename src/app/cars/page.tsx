@@ -12,6 +12,65 @@ const CarCard = dynamic(() => import("@/app/components/carcard"), {
 
 const CARS_PER_PAGE = 9;
 
+// Utility function to shuffle array using Fisher-Yates algorithm
+const shuffleArray = <T,>(array: T[]): T[] => {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+};
+
+// Advanced shuffle that ensures fair distribution across dealers/users
+const fairShuffle = (cars: Car[]): Car[] => {
+  // Group cars by lister (dealer or user)
+  const carsByLister = cars.reduce((acc, car) => {
+    let listerKey: string;
+    
+    if (typeof car.dealer === 'string') {
+      listerKey = car.dealer;
+    } else if (car.dealer && typeof car.dealer === 'object' && 'id' in car.dealer) {
+      listerKey = (car.dealer as any)._id || (car.dealer as any).id || 'unknown';
+    } else if (typeof car.user === 'string') {
+      listerKey = car.user;
+    } else if (car.user && typeof car.user === 'object' && 'id' in car.user) {
+      listerKey = (car.user as any)._id || (car.user as any).id || 'unknown';
+    } else {
+      listerKey = 'unknown';
+    }
+    
+    if (!acc[listerKey]) {
+      acc[listerKey] = [];
+    }
+    acc[listerKey].push(car);
+    return acc;
+  }, {} as Record<string, Car[]>);
+
+  // Shuffle cars within each lister group
+  Object.keys(carsByLister).forEach(lister => {
+    carsByLister[lister] = shuffleArray(carsByLister[lister]);
+  });
+
+  // Interleave cars from different listers for fair distribution
+  const listerKeys = Object.keys(carsByLister);
+  const shuffledCars: Car[] = [];
+  const maxCarsPerLister = Math.max(...Object.values(carsByLister).map(cars => cars.length));
+
+  for (let i = 0; i < maxCarsPerLister; i++) {
+    // Shuffle lister order for each round to ensure fairness
+    const shuffledListers = shuffleArray(listerKeys);
+    
+    shuffledListers.forEach(lister => {
+      if (carsByLister[lister][i]) {
+        shuffledCars.push(carsByLister[lister][i]);
+      }
+    });
+  }
+
+  return shuffledCars;
+};
+
 function CarsContent() {
   const [cars, setCars] = useState<Car[]>([]);
   const [allCars, setAllCars] = useState<Car[]>([]); // Store all cars for client-side filtering
@@ -77,11 +136,11 @@ function CarsContent() {
     setCurrentPage(1);
   }, [initialFilters]);
 
-  // CLIENT-SIDE FILTERING LOGIC (based on your working example)
+  // CLIENT-SIDE FILTERING AND RANDOMIZATION LOGIC
   const filteredCars = useMemo(() => {
     if (!allCars.length) return [];
 
-    return allCars.filter(car => {
+    let filtered = allCars.filter(car => {
       // Search filter - searches in make, model, and other relevant fields
       if (filters.search && filters.search.trim()) {
         const searchTerm = filters.search.toLowerCase().trim();
@@ -114,7 +173,7 @@ function CarsContent() {
         return false;
       }
 
-      // Model year filter - FIXED
+      // Model year filter
       if (filters.modelYear && car.year && car.year.toString() !== filters.modelYear) {
         return false;
       }
@@ -151,6 +210,9 @@ function CarsContent() {
 
       return true;
     });
+
+    // Apply fair randomization after filtering
+    return fairShuffle(filtered);
   }, [allCars, filters]);
 
   // Paginate filtered cars
