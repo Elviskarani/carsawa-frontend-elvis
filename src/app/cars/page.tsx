@@ -5,12 +5,15 @@ import { getAllCars, type Car } from "@/app/services/api";
 import dynamic from 'next/dynamic';
 import { useSearchParams } from "next/navigation";
 import CarFilterComponent, { type Filters } from "../components/CarFilterComponent";
+import ComparisonModal from "../components/ComparisonModal";
+import { ArrowLeftRight } from "lucide-react";
 
 const CarCard = dynamic(() => import("@/app/components/carcard"), {
   loading: () => <div className="bg-white rounded-xl h-80 animate-pulse"></div>,
 });
 
 const CARS_PER_PAGE = 9;
+const MAX_COMPARE_CARS = 4;
 
 // Utility function to shuffle array using Fisher-Yates algorithm
 const shuffleArray = <T,>(array: T[]): T[] => {
@@ -78,6 +81,11 @@ function CarsContent() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalCars, setTotalCars] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
+  
+  // Comparison state
+  const [compareList, setCompareList] = useState<Car[]>([]);
+  const [showCompareNotification, setShowCompareNotification] = useState(false);
+  
   const [filters, setFilters] = useState<Filters>({
     search: '',
     brand: '',
@@ -108,6 +116,46 @@ function CarsContent() {
       return priorityA - priorityB;
     });
   };
+
+  // Helper function to get car ID
+  const getCarId = (car: Car): string => {
+    return car._id || car.id || `${car.make}-${car.model}-${car.year}-${Math.random()}`;
+  };
+
+  // Comparison handlers
+  const handleAddToCompare = useCallback((car: Car) => {
+    const carId = getCarId(car);
+    
+    setCompareList(prev => {
+      // Check if car is already in compare list
+      if (prev.some(c => getCarId(c) === carId)) {
+        // Remove from compare list
+        return prev.filter(c => getCarId(c) !== carId);
+      }
+      
+      // Check if we've reached the maximum
+      if (prev.length >= MAX_COMPARE_CARS) {
+        setShowCompareNotification(true);
+        setTimeout(() => setShowCompareNotification(false), 3000);
+        return prev;
+      }
+      
+      // Add to compare list
+      return [...prev, car];
+    });
+  }, []);
+
+  const handleRemoveFromCompare = useCallback((carId: string) => {
+    setCompareList(prev => prev.filter(car => getCarId(car) !== carId));
+  }, []);
+
+  const handleClearCompare = useCallback(() => {
+    setCompareList([]);
+  }, []);
+
+  const isCarInCompareList = useCallback((car: Car): boolean => {
+    return compareList.some(c => getCarId(c) === getCarId(car));
+  }, [compareList]);
 
   // Initialize filters with URL parameters
   const initialFilters = useMemo(() => {
@@ -387,9 +435,28 @@ function CarsContent() {
   return (
     <div className="min-h-screen bg-gray-100">
       <div className="container mx-auto py-8 px-4">
+        {/* Compare notification */}
+        {showCompareNotification && (
+          <div className="fixed top-4 right-4 z-50 bg-orange-500 text-white px-6 py-3 rounded-lg shadow-lg transition-all duration-300">
+            <div className="flex items-center space-x-2">
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+              </svg>
+              <span>You can compare up to {MAX_COMPARE_CARS} cars only!</span>
+            </div>
+          </div>
+        )}
+
         <CarFilterComponent 
           onFiltersChange={handleFiltersChange}
           initialFilters={initialFilters}
+        />
+
+        {/* Comparison Modal */}
+        <ComparisonModal
+          selectedCars={compareList}
+          onRemoveCar={handleRemoveFromCompare}
+          onClearAll={handleClearCompare}
         />
         
         {/* Active Filters Display */}
@@ -428,10 +495,29 @@ function CarsContent() {
             ) : paginatedCars.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                 {paginatedCars.map((car) => (
-                  <div key={car._id || car.id || `${car.make}-${car.model}-${car.year}-${Math.random()}`} className="w-full">
+                  <div key={getCarId(car)} className="w-full relative">
+                    {/* Compare button overlay */}
+                    <div className="absolute top-4 left-4 z-10">
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          handleAddToCompare(car);
+                        }}
+                        className={`p-2 rounded-full shadow-lg transition-all duration-200 ${
+                          isCarInCompareList(car)
+                            ? 'bg-[#272d3c] text-white   hover:bg-[#272d3c]'
+                            : 'bg-white text-gray-600  hover:bg-gray-50 hover:border-gray-400'
+                        }`}
+                        title={isCarInCompareList(car) ? 'Remove from comparison' : 'Compare'}
+                      >
+                        <ArrowLeftRight size={20} />
+                      </button>
+                    </div>
+
                     <CarCard
                       {...car}
-                      id={car._id || car.id || `${car.make}-${car.model}-${car.year}-${Math.random()}`}
+                      id={getCarId(car)}
                       make={car.make || ""}
                       model={car.model || ""}
                       bodyType={car.bodyType || "N/A"}
