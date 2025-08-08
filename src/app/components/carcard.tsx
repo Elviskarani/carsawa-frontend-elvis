@@ -5,7 +5,9 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Share2, Heart, Loader2 } from 'lucide-react';
 import { toggleFavorite, checkFavoriteStatus, isAuthenticated } from '@/app/services/api';
-import AuthModal from '@/app/components/Authmodal'; // Adjust the import path as needed
+import AuthModal from '@/app/components/Authmodal';
+import { generateCarUrl } from '@/app/services/api';
+
 
 interface CarCardProps {
   id?: string;
@@ -20,6 +22,7 @@ interface CarCardProps {
   engineSize: string;
   status: string;
   images: string[];
+  url?: string; // Add this new prop
   onFavoriteChange?: (carId: string, isFavorited: boolean) => void;
 }
 
@@ -36,6 +39,7 @@ const CarCard: React.FC<CarCardProps> = ({
   engineSize,
   status,
   images,
+  url, // Add this
   onFavoriteChange
 }) => {
   const [isFavorited, setIsFavorited] = useState(false);
@@ -115,7 +119,7 @@ const CarCard: React.FC<CarCardProps> = ({
     const shareData = {
       title: `${make} ${model}`,
       text: `Check out this ${year} ${make} ${model} for KES ${price.toLocaleString()}`,
-      url: window.location.origin + `/cars/${id}`
+      url: window.location.origin + (url || `/cars/${id}`) // Update this line
     };
 
     // Use Web Share API if available, otherwise copy to clipboard
@@ -144,7 +148,7 @@ const CarCard: React.FC<CarCardProps> = ({
   return (
     <>
       <div className="bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow">
-        <Link href={`/cars/${id}`}>
+      <Link href={url || `/cars/${id}`}>
           <div className="relative h-48 w-full">
             <Image
               src={imageUrl}

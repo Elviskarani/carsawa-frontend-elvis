@@ -2,21 +2,30 @@ import Link from "next/link";
 import { Metadata } from 'next';
 import ImageCarousel from "@/app/components/imagecarousel";
 import CarDetailsPage from "@/app/components/cardata";
-import { getCarById, type Car, getDealerById, type Dealer, getUserById, type User } from "@/app/services/api";
+import { 
+  getCarById, 
+  type Car, 
+  getDealerById, 
+  type Dealer, 
+  getUserById, 
+  type User,
+  extractIdFromSlug
+} from "@/app/services/api";
 
 // Generate dynamic metadata for SEO
-export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   try {
     const resolvedParams = await params;
-    const carId = resolvedParams.id;
+    const slugWithId = resolvedParams.slug;
     
-    if (!carId) {
+    if (!slugWithId) {
       return {
         title: 'Car Not Found | Carsawa Africa',
         description: 'The requested car listing could not be found. Browse our selection of quality used cars for sale in Kenya.',
       };
     }
 
+    const carId = extractIdFromSlug(slugWithId);
     const car = await getCarById(carId);
     
     if (!car) {
@@ -65,7 +74,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
         description,
         type: 'website',
         locale: 'en_KE',
-        url: `https://carsawa.africa/cars/${carId}`,
+        url: `https://carsawa.africa/cars/${slugWithId}`,
         siteName: 'Carsawa Africa',
         images: car.images && car.images.length > 0 
           ? [{
@@ -85,10 +94,10 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
         card: 'summary_large_image',
         title,
         description,
-        images: car.images && car.images.length > 0 ? [car.images[0]] : ['/og-default-car.jpg'],
+        images: car.images && car.images.length > 0 ? [car.images[0]] : ['/carsawa.png'],
       },
       alternates: {
-        canonical: `https://carsawa.africa/cars/${carId}`,
+        canonical: `https://carsawa.africa/cars/${slugWithId}`,
       },
       robots: {
         index: car.status === 'Available' ? true : false,
@@ -107,9 +116,10 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 }
 
 // Main page component (Server Component)
-export default async function CarDetailsPageWrapper({ params }: { params: Promise<{ id: string }> }) {
+export default async function CarDetailsPageWrapper({ params }: { params: Promise<{ slug: string }> }) {
   const resolvedParams = await params;
-  const carId = resolvedParams.id;
+  const slugWithId = resolvedParams.slug;
+  const carId = extractIdFromSlug(slugWithId);
 
   let car: Car | null = null;
   let dealer: Dealer | null = null;

@@ -137,6 +137,56 @@ export interface UserFavoritesResponse {
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
+// Utility function to generate SEO-friendly slug from car data
+export function generateCarSlug(car: Car): string {
+  const parts = [
+    car.year?.toString() || '',
+    car.make || '',
+    car.model || ''
+  ].filter(Boolean);
+  
+  const title = parts.join(' ').trim();
+  
+  if (!title) {
+    return 'car-listing';
+  }
+  
+  return title
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, '') // Remove special characters
+    .replace(/\s+/g, '-') // Replace spaces with hyphens
+    .replace(/-+/g, '-') // Replace multiple hyphens with single hyphen
+    .trim()
+    .replace(/^-+|-+$/g, ''); // Remove leading/trailing hyphens
+}
+
+// Utility function to generate full car URL with slug and ID
+export function generateCarUrl(car: Car): string {
+  const slug = generateCarSlug(car);
+  const id = car._id || car.id || '';
+  return `/cars/${slug}-${id}`;
+}
+
+// Utility function to extract ID from slug-id combination
+export function extractIdFromSlug(slugWithId: string): string {
+  // Find the last hyphen and extract everything after it as the ID
+  const lastHyphenIndex = slugWithId.lastIndexOf('-');
+  if (lastHyphenIndex === -1) {
+    // If no hyphen found, assume the entire string is the ID (backward compatibility)
+    return slugWithId;
+  }
+  
+  const potentialId = slugWithId.substring(lastHyphenIndex + 1);
+  
+  // Validate that it looks like a MongoDB ObjectId (24 hex characters) or similar ID
+  if (potentialId.length >= 12 && /^[a-f0-9]{12,}$/i.test(potentialId)) {
+    return potentialId;
+  }
+  
+  // If it doesn't look like an ID, return the whole string (backward compatibility)
+  return slugWithId;
+}
+
 export const TokenManager = {
   getToken: (): string | null => {
     if (typeof window !== 'undefined') {

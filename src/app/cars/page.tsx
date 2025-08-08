@@ -8,6 +8,8 @@ import CarFilterComponent, { type Filters } from "../components/CarFilterCompone
 import ComparisonModal from "../components/ComparisonModal";
 import { ArrowLeftRight } from "lucide-react";
 import { Metadata } from 'next';
+import { generateCarUrl } from "@/app/services/api";
+
 
 const CarCard = dynamic(() => import("@/app/components/carcard"), {
   loading: () => <div className="bg-white rounded-xl h-80 animate-pulse"></div>,
@@ -701,6 +703,7 @@ function CarsContent() {
                     <CarCard
                       {...car}
                       id={getCarId(car)}
+                      url={generateCarUrl(car)} // Add this line
                       make={car.make || ""}
                       model={car.model || ""}
                       bodyType={car.bodyType || "N/A"}
