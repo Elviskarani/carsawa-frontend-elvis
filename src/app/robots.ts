@@ -26,6 +26,6 @@ export default function robots(): MetadataRoute.Robots {
         ],
       },
     ],
-    sitemap: 'https://carsawa.africa/sitemap.xml',
+    sitemap: 'https://www.carsawa.africa/sitemap.xml',
   };
 }

@@ -61,8 +61,9 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
       car.model && `${car.model} Kenya`,
       car.year && `${car.year} cars Kenya`,
       'Carsawa Africa',
-      'pre-purchase inspection Kenya',
-      'verified cars Kenya'
+      'pre-purchase inspection Nairobi',
+      'verified cars Nairobi',
+      'cars for sale Nairobi'
     ].filter(Boolean).join(', ');
 
     return {
@@ -74,7 +75,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
         description,
         type: 'website',
         locale: 'en_KE',
-        url: `https://carsawa.africa/cars/${slugWithId}`,
+        url: `https://www.carsawa.africa/cars/${slugWithId}`,
         siteName: 'Carsawa Africa',
         images: car.images && car.images.length > 0 
           ? [{
@@ -97,7 +98,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
         images: car.images && car.images.length > 0 ? [car.images[0]] : ['/carsawa.png'],
       },
       alternates: {
-        canonical: `https://carsawa.africa/cars/${slugWithId}`,
+        canonical: `https://www.carsawa.africa/cars/${slugWithId}`,
       },
       robots: {
         index: car.status === 'Available' ? true : false,

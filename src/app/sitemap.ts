@@ -2,8 +2,8 @@
 import { MetadataRoute } from 'next'
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = 'https://www.carsawa.africa' // Replace with your actual domain
-
+  const baseUrl = 'https://www.carsawa.africa' 
+  
   // Static pages
   const staticPages = [
     {
@@ -25,7 +25,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.8,
     },
   ]
-
+  
   // Popular car search combinations for SEO
   const popularSearches = [
     // Price-based searches
@@ -73,7 +73,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { fuelType: 'Petrol', priority: 0.4 },
     { fuelType: 'Hybrid', priority: 0.5 },
   ]
-
+  
   // Generate URLs for popular searches
   const searchPages = popularSearches.map((params) => {
     const searchParams = new URLSearchParams()
@@ -83,14 +83,17 @@ export default function sitemap(): MetadataRoute.Sitemap {
       }
     })
     
+    // Fix: Escape ampersands for XML compatibility
+    const queryString = searchParams.toString().replace(/&/g, '&amp;');
+    
     return {
-      url: `${baseUrl}/cars?${searchParams.toString()}`,
+      url: `${baseUrl}/cars?${queryString}`,
       lastModified: new Date(),
       changeFrequency: 'daily' as const,
       priority: params.priority || 0.5,
     }
   })
-
+  
   return [...staticPages, ...searchPages]
 }
 
@@ -99,7 +102,6 @@ export async function generateDynamicSitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = 'https://www.carsawa.africa'
   
   try {
-    
     return sitemap()
   } catch (error) {
     console.error('Error generating dynamic sitemap:', error)
