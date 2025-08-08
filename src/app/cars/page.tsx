@@ -3,10 +3,11 @@
 import React, { useState, useMemo, useCallback, Suspense, useEffect } from "react";
 import { getAllCars, type Car } from "@/app/services/api";
 import dynamic from 'next/dynamic';
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import CarFilterComponent, { type Filters } from "../components/CarFilterComponent";
 import ComparisonModal from "../components/ComparisonModal";
 import { ArrowLeftRight } from "lucide-react";
+import { Metadata } from 'next';
 
 const CarCard = dynamic(() => import("@/app/components/carcard"), {
   loading: () => <div className="bg-white rounded-xl h-80 animate-pulse"></div>,
@@ -14,6 +15,60 @@ const CarCard = dynamic(() => import("@/app/components/carcard"), {
 
 const CARS_PER_PAGE = 9;
 const MAX_COMPARE_CARS = 4;
+
+// SEO utility functions
+const generateSEOTitle = (filters: Filters, totalCars: number): string => {
+  const parts = [];
+  
+  if (filters.price) {
+    const priceLabels: Record<string, string> = {
+      '0-500000': 'Under KES 500,000',
+      '500000-1000000': 'KES 500K - 1M',
+      '1000000-2000000': 'KES 1M - 2M',
+      '2000000-3000000': 'KES 2M - 3M',
+      '3000000-5000000': 'KES 3M - 5M',
+      '5000000-8000000': 'KES 5M - 8M',
+      '8000000-12000000': 'KES 8M - 12M',
+      '12000000-20000000': 'KES 12M - 20M',
+      '20000000+': 'Above KES 20M'
+    };
+    parts.push(priceLabels[filters.price] || 'Cars');
+  }
+  
+  if (filters.brand) {
+    parts.unshift(filters.brand);
+  }
+  
+  if (filters.bodyType) {
+    parts.push(filters.bodyType);
+  }
+  
+  if (filters.modelYear) {
+    parts.push(`${filters.modelYear} Model`);
+  }
+  
+  const title = parts.length > 0 ? parts.join(' ') : 'Cars';
+  return `${title} for Sale in Kenya${totalCars > 0 ? ` (${totalCars} Found)` : ''} | YourCarSite`;
+};
+
+const generateSEODescription = (filters: Filters, totalCars: number): string => {
+  let description = `Find ${totalCars} cars for sale in Kenya. `;
+  
+  if (filters.brand && filters.price) {
+    const priceText = filters.price.includes('1000000-2000000') ? 'under 2 million' :
+                     filters.price.includes('500000-1000000') ? 'under 1 million' :
+                     filters.price.includes('0-500000') ? 'under 500,000' : 'in your budget';
+    description += `Browse ${filters.brand} cars ${priceText}. `;
+  } else if (filters.price) {
+    description += `Browse cars in your price range. `;
+  } else if (filters.brand) {
+    description += `Browse ${filters.brand} vehicles. `;
+  }
+  
+  description += `Compare prices, view photos, and contact sellers directly. Best car deals in Kenya.`;
+  
+  return description;
+};
 
 // Utility function to shuffle array using Fisher-Yates algorithm
 const shuffleArray = <T,>(array: T[]): T[] => {
@@ -74,6 +129,25 @@ const fairShuffle = (cars: Car[]): Car[] => {
   return shuffledCars;
 };
 
+// URL utility functions
+const buildURL = (filters: Filters, page: number = 1): string => {
+  const params = new URLSearchParams();
+  
+  // Add filters to URL
+  Object.entries(filters).forEach(([key, value]) => {
+    if (value && value.trim() !== '') {
+      params.set(key, value);
+    }
+  });
+  
+  // Add page if not first page
+  if (page > 1) {
+    params.set('page', page.toString());
+  }
+  
+  return params.toString() ? `?${params.toString()}` : '';
+};
+
 function CarsContent() {
   const [cars, setCars] = useState<Car[]>([]);
   const [allCars, setAllCars] = useState<Car[]>([]); // Store all cars for client-side filtering
@@ -100,6 +174,8 @@ function CarsContent() {
   });
   
   const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
 
   const statusPriority: Record<string, number> = {
     "available": 1,
@@ -159,30 +235,65 @@ function CarsContent() {
 
   // Initialize filters with URL parameters
   const initialFilters = useMemo(() => {
-    const typeParam = searchParams.get('type');
-    const makeParam = searchParams.get('make');
-    const searchParam = searchParams.get('search');
-    const yearParam = searchParams.get('year');
-    
-    return {
-      search: searchParam || '',
-      bodyType: typeParam || '',
-      brand: makeParam || '',
-      modelYear: yearParam || '',
-      model: '',
-      mileage: '',
-      price: '',
-      fuelType: '',
-      color: '',
-      transmission: ''
+    const urlFilters: Filters = {
+      search: searchParams.get('search') || '',
+      brand: searchParams.get('brand') || searchParams.get('make') || '',
+      model: searchParams.get('model') || '',
+      mileage: searchParams.get('mileage') || '',
+      price: searchParams.get('price') || '',
+      bodyType: searchParams.get('bodyType') || searchParams.get('type') || '',
+      fuelType: searchParams.get('fuelType') || '',
+      color: searchParams.get('color') || '',
+      transmission: searchParams.get('transmission') || '',
+      modelYear: searchParams.get('modelYear') || searchParams.get('year') || ''
     };
+    
+    return urlFilters;
   }, [searchParams]);
 
-  // Set initial filters when URL parameters change
+  // Set initial filters and page when URL parameters change
   useEffect(() => {
     setFilters(initialFilters);
-    setCurrentPage(1);
-  }, [initialFilters]);
+    const pageParam = searchParams.get('page');
+    const page = pageParam ? parseInt(pageParam, 10) : 1;
+    setCurrentPage(page > 0 ? page : 1);
+  }, [initialFilters, searchParams]);
+
+  // Update URL when filters change
+  const updateURL = useCallback((newFilters: Filters, page: number = 1) => {
+    const url = buildURL(newFilters, page);
+    const newPath = `${pathname}${url}`;
+    
+    // Use replace for filter changes to avoid cluttering history
+    router.replace(newPath, { scroll: false });
+  }, [router, pathname]);
+
+  // Update document title and meta tags for SEO
+  useEffect(() => {
+    const title = generateSEOTitle(filters, totalCars);
+    const description = generateSEODescription(filters, totalCars);
+    
+    document.title = title;
+    
+    // Update meta description
+    let metaDescription = document.querySelector('meta[name="description"]');
+    if (!metaDescription) {
+      metaDescription = document.createElement('meta');
+      metaDescription.setAttribute('name', 'description');
+      document.head.appendChild(metaDescription);
+    }
+    metaDescription.setAttribute('content', description);
+    
+    // Update canonical URL
+    let canonical = document.querySelector('link[rel="canonical"]') as HTMLLinkElement;
+    if (!canonical) {
+      canonical = document.createElement('link');
+      canonical.setAttribute('rel', 'canonical');
+      document.head.appendChild(canonical);
+    }
+    canonical.href = window.location.href;
+    
+  }, [filters, totalCars]);
 
   // CLIENT-SIDE FILTERING AND RANDOMIZATION LOGIC
   const filteredCars = useMemo(() => {
@@ -279,8 +390,9 @@ function CarsContent() {
     const newTotalPages = Math.ceil(filteredCars.length / CARS_PER_PAGE);
     if (currentPage > newTotalPages && newTotalPages > 0) {
       setCurrentPage(1);
+      updateURL(filters, 1);
     }
-  }, [filteredCars, currentPage]);
+  }, [filteredCars, currentPage, filters, updateURL]);
 
   // Fetch all cars initially (without pagination for client-side filtering)
   const fetchAllCars = useCallback(async () => {
@@ -306,16 +418,18 @@ function CarsContent() {
     fetchAllCars();
   }, [fetchAllCars]);
 
-  // Handle filter changes
+  // Handle filter changes with URL update
   const handleFiltersChange = useCallback((newFilters: Filters) => {
     console.log('Filters changed:', newFilters);
     setFilters(newFilters);
     setCurrentPage(1); // Reset to first page when filters change
-  }, []);
+    updateURL(newFilters, 1);
+  }, [updateURL]);
 
   const paginate = (pageNumber: number) => {
     if (pageNumber > 0 && pageNumber <= totalPages && pageNumber !== currentPage) {
       setCurrentPage(pageNumber);
+      updateURL(filters, pageNumber);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
@@ -432,9 +546,78 @@ function CarsContent() {
     return pageNumbers;
   };
 
+  // Generate structured data for SEO
+  const generateStructuredData = () => {
+    const structuredData = {
+      "@context": "https://schema.org",
+      "@type": "ItemList",
+      "name": generateSEOTitle(filters, totalCars),
+      "description": generateSEODescription(filters, totalCars),
+      "numberOfItems": totalCars,
+      "itemListElement": paginatedCars.map((car, index) => ({
+        "@type": "ListItem",
+        "position": (currentPage - 1) * CARS_PER_PAGE + index + 1,
+        "item": {
+          "@type": "Vehicle",
+          "name": `${car.make} ${car.model} ${car.year}`,
+          "brand": car.make,
+          "model": car.model,
+          "vehicleModelDate": car.year,
+          "price": {
+            "@type": "MonetaryAmount",
+            "currency": "KES",
+            "value": car.price
+          },
+          "mileageFromOdometer": {
+            "@type": "QuantitativeValue",
+            "value": car.mileage,
+            "unitCode": "KMT"
+          },
+          "bodyType": car.bodyType,
+          "fuelType": car.fuelType,
+          "vehicleTransmission": car.transmission,
+          "image": car.images?.[0] || '',
+          "url": `${window.location.origin}/cars/${getCarId(car)}`
+        }
+      }))
+    };
+
+    return JSON.stringify(structuredData);
+  };
+
   return (
     <div className="min-h-screen bg-gray-100">
+      {/* SEO structured data */}
+      {!loading && totalCars > 0 && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: generateStructuredData() }}
+        />
+      )}
+      
       <div className="container mx-auto py-8 px-4">
+        {/* SEO-friendly heading */}
+        <div className="mb-6">
+          <h1 className="text-sm md:text-sm  text-gray-100 mb-2">
+            {filters.brand && filters.price ? (
+              `${filters.brand} Cars ${filters.price.includes('1000000') ? 'Under KES 1 Million' : 'for Sale'} in Kenya`
+            ) : filters.price ? (
+              `Cars ${filters.price.includes('1000000-2000000') ? 'Under KES 2 Million' : 
+                     filters.price.includes('500000-1000000') ? 'Under KES 1 Million' : 
+                     'for Sale'} in Kenya`
+            ) : filters.brand ? (
+              `${filters.brand} Cars for Sale in Kenya`
+            ) : (
+              'Cars for Sale in Kenya'
+            )}
+          </h1>
+          {totalCars > 0 && (
+            <p className="text-gray-100">
+              Browse {totalCars} verified {filters.brand || ''} cars {filters.price ? 'in your price range' : 'available'} from trusted dealers and owners across Kenya.
+            </p>
+          )}
+        </div>
+
         {/* Compare notification */}
         {showCompareNotification && (
           <div className="fixed top-4 right-4 z-50 bg-orange-500 text-white px-6 py-3 rounded-lg shadow-lg transition-all duration-300">
@@ -627,6 +810,68 @@ function CarsContent() {
                 </select>
               </div>
             )}
+          </div>
+        )}
+
+        {/* SEO Content Section */}
+        {!loading && (
+          <div className="mt-16 max-w-4xl mx-auto prose prose-gray">
+            <div className="bg-white rounded-xl p-8 shadow-sm">
+              <h2 className="text-xl font-semibold text-gray-900 mb-4">
+                {filters.price ? 'Find Your Dream Car Within Budget' : 'Buy and Sell Cars in Kenya'}
+              </h2>
+              
+              <div className="text-gray-600 space-y-4 text-sm leading-relaxed">
+                {filters.brand && filters.price ? (
+                  <p>
+                    Looking for <strong>{filters.brand} cars {filters.price.includes('1000000') ? 'under 1 million' : 'in your budget'}</strong>? 
+                    You've found the right place. We have {totalCars} verified {filters.brand} vehicles available from trusted dealers and individual sellers across Kenya.
+                  </p>
+                ) : filters.price ? (
+                  <p>
+                    Discover <strong>cars {filters.price.includes('1000000-2000000') ? 'under KES 2 million' : 
+                                        filters.price.includes('500000-1000000') ? 'under KES 1 million' : 
+                                        'in your price range'}</strong> in Kenya. 
+                    Compare prices, features, and find the perfect vehicle that fits your budget from our selection of {totalCars} cars.
+                  </p>
+                ) : (
+                  <p>
+                    Kenya's leading platform for buying and selling cars. Find your next vehicle from thousands of verified listings 
+                    from authorized dealers and trusted individual sellers nationwide.
+                  </p>
+                )}
+                
+                <p>
+                  All our listings are verified with detailed photos, specifications, and transparent pricing. 
+                  Whether you're looking for a fuel-efficient sedan for city driving, a robust SUV for family adventures, 
+                  or a luxury vehicle that makes a statement, we have options for every need and budget.
+                </p>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                  <div>
+                    <h3 className="font-semibold text-gray-900 mb-2">Why Choose Our Platform?</h3>
+                    <ul className="text-sm text-gray-600 space-y-1">
+                      <li>• Verified dealers and sellers</li>
+                      <li>• Transparent pricing</li>
+                      <li>• Detailed vehicle history</li>
+                      <li>• Secure transactions</li>
+                      <li>• Comprehensive search filters</li>
+                    </ul>
+                  </div>
+                  
+                  <div>
+                    <h3 className="font-semibold text-gray-900 mb-2">Popular Searches</h3>
+                    <ul className="text-sm text-gray-600 space-y-1">
+                      <li>• Toyota cars under 1 million</li>
+                      <li>• Honda vehicles in Nairobi</li>
+                      <li>• SUVs under 2 million</li>
+                      <li>• Automatic transmission cars</li>
+                      <li>• Low mileage vehicles</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         )}
       </div>

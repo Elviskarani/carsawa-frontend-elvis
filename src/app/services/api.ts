@@ -337,3 +337,24 @@ export const searchCars = (searchQuery: string, fetchedCars: Car[], filters: Sea
   const query = params.toString();
   return fetchApi<PaginatedCarResponse>(`/cars?${query}`);
 };
+
+// Add this to your existing API service file
+export async function getAllCarIds(): Promise<string[]> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/cars/ids`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch car IDs: ${response.statusText}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching car IDs:', error);
+    throw error;
+  }
+}
