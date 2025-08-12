@@ -50,7 +50,7 @@ const generateSEOTitle = (filters: Filters, totalCars: number): string => {
   }
   
   const title = parts.length > 0 ? parts.join(' ') : 'Cars';
-  return `${title} for Sale in Kenya${totalCars > 0 ? ` (${totalCars} Found)` : ''} | YourCarSite`;
+  return `${title} for Sale in Kenya${totalCars > 0 ? ` (${totalCars} Found)` : ''} | carsawa`;
 };
 
 const generateSEODescription = (filters: Filters, totalCars: number): string => {

@@ -198,7 +198,8 @@ const CarDetailsPage: React.FC<CarDataPageProps> = ({ car, dealer, user }) => {
               <button
                 className="flex-1 bg-orange-500 text-white py-4 rounded-lg flex items-center justify-center space-x-3 hover:bg-orange-600 transition shadow-md"
                 onClick={() => {
-                  const inspectionMessage = `Hi, I would like to book an inspection for this car:\n\n${title}\nPrice: ${car.price ? formatPrice(car.price) : 'N/A'}\nYear: ${car.year || 'N/A'}\nMake: ${car.make || 'N/A'}\nModel: ${car.model || 'N/A'}\nMileage: ${car.mileage ? `${car.mileage.toLocaleString()} km` : 'N/A'}\n\nPlease let me know available times for inspection.`;
+                  const carLink = window.location.href;
+                  const inspectionMessage = `Hi, I would like to book an inspection for this car:\n\n${title}\nPrice: ${car.price ? formatPrice(car.price) : 'N/A'}\nYear: ${car.year || 'N/A'}\nMake: ${car.make || 'N/A'}\nModel: ${car.model || 'N/A'}\nMileage: ${car.mileage ? `${car.mileage.toLocaleString()} km` : 'N/A'}\n\nPlease let me know available times for inspection.${carLink}\n\nThank you`;
                   window.open(
                     `https://wa.me/254791001601?text=${encodeURIComponent(inspectionMessage)}`,
                     '_blank'
@@ -240,7 +241,8 @@ const CarDetailsPage: React.FC<CarDataPageProps> = ({ car, dealer, user }) => {
               <button
                 className="flex-1 bg-orange-500 text-white py-4 rounded-lg flex items-center justify-center space-x-3 hover:bg-orange-600 transition shadow-md"
                 onClick={() => {
-                  const inspectionMessage = `Hi, I would like to book an inspection for this car:\n\n${title}\nPrice: ${car.price ? formatPrice(car.price) : 'N/A'}\nYear: ${car.year || 'N/A'}\nMake: ${car.make || 'N/A'}\nModel: ${car.model || 'N/A'}\nMileage: ${car.mileage ? `${car.mileage.toLocaleString()} km` : 'N/A'}\n\nPlease let me know available times for inspection.`;
+                  const carLink = window.location.href;
+                  const inspectionMessage = `Hi, I would like to book an inspection for this car:\n\n${title}\nPrice: ${car.price ? formatPrice(car.price) : 'N/A'}\nYear: ${car.year || 'N/A'}\nMake: ${car.make || 'N/A'}\nModel: ${car.model || 'N/A'}\nMileage: ${car.mileage ? `${car.mileage.toLocaleString()} km` : 'N/A'}\n\nPlease let me know available times for inspection.${carLink}\nThank you for your time.`;
                   window.open(
                     `https://wa.me/254791001601?text=${encodeURIComponent(inspectionMessage)}`,
                     '_blank'

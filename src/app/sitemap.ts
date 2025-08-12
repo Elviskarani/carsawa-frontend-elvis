@@ -28,7 +28,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   
   // Popular car search combinations for SEO
   const popularSearches = [
-    // Price-based searches
+    // Price-based searches 
     { price: '500000-1000000', priority: 0.9 }, // Cars under 1M (very popular)
     { price: '1000000-2000000', priority: 0.8 }, // Cars 1M-2M
     { price: '0-500000', priority: 0.7 }, // Cars under 500K
