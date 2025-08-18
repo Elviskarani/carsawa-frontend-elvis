@@ -214,6 +214,9 @@ const Header = () => {
             <NavLink href="/account" pathname={pathname} textColor={getTextColor()}>
               Account
             </NavLink>
+            <NavLink href="https://blog.carsawa.africa" pathname={pathname} textColor={getTextColor()}>
+              blog
+            </NavLink>
           </div>
 
       
@@ -307,6 +310,14 @@ const Header = () => {
         onClick={() => setIsMenuOpen(false)}
       >
         Dealerships
+      </NavLink>
+      <NavLink
+        href="https://blog.carsawa.africa"
+        pathname={pathname}
+        textColor="text-black"
+        onClick={() => setIsMenuOpen(false)}
+      >
+        Blog
       </NavLink>
 
       <div className={`border-t pt-2  sm:hidden ${getMobileBorderColor()}`}>

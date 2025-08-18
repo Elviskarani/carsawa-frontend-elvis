@@ -45,7 +45,7 @@ const HeroSection = () => {
                         Fast and Easy way
                     </h1>
                     <h1 className='text-white text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-6 sm:mb-8 leading-tight'>
-                        to buy or sell cars  🇰🇪
+                        to buy or sell cars in Kenya <span role="img" aria-label="Kenya flag">🇰🇪</span>
                     </h1>
 
                     {/* Actions Container */}

@@ -41,7 +41,7 @@ export function generateMetadata({ searchParams }: { searchParams: SEOParams }):
     const title = parts.length > 0 ? parts.join(' ') + ' Cars' : 'Cars';
     const pageText = page && parseInt(page) > 1 ? ` - Page ${page}` : '';
     
-    return `${title} for Sale in Kenya${pageText} | YourCarSite`;
+    return `${title} for Sale in Kenya${pageText} | Carsawa`;
   };
 
   // Generate dynamic description
@@ -126,7 +126,7 @@ export function generateMetadata({ searchParams }: { searchParams: SEOParams }):
       siteName: 'Carsawa',
       images: [
         {
-          url: '/carsawa.png', // Add your default OG image
+          url: '/carsawa.png', 
           width: 1200,
           height: 630,
           alt: 'Cars for Sale in Kenya',
@@ -137,7 +137,7 @@ export function generateMetadata({ searchParams }: { searchParams: SEOParams }):
       card: 'summary_large_image',
       title,
       description,
-      site: '@carsawake', // Add your Twitter handle
+      site: '@carsawake', 
       creator: '@carsawa',
       images: ['/carsawa.png'],
     },
