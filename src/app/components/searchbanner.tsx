@@ -28,7 +28,7 @@ const HeroSection = () => {
             {/* Background Image */}
             <div className="absolute inset-0 z-0">
                 <Image
-                    src="/hero_image.webp"
+                    src="/hero_image2.png"
                     alt="Happy family"
                     className="h-full w-full object-cover"
                     fill
